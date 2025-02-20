@@ -1,0 +1,126 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gestion_empleados/views/index_screen.dart';
+import 'package:gestion_empleados/services/api_service.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key}); // ✅ Agregamos `super.key` para evitar warnings
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController codigoVerificacionController = TextEditingController();
+  bool isLoading = false;
+  bool necesitaVerificacion = false;
+  String emailPendiente = "";
+
+  Future<void> _login() async {
+    setState(() => isLoading = true);
+
+    var response = await ApiService.login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
+
+    setState(() => isLoading = false);
+
+    if (response["success"]) {
+      if (response["isRegistered"]) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const IndexScreen()),
+        );
+      } else {
+        setState(() {
+          necesitaVerificacion = true;
+          emailPendiente = response["email"];
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Código enviado a ${response["email"]}. Ingrésalo para continuar."),
+        ));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(response["message"] ?? "Error en el login"),
+      ));
+    }
+  }
+
+  Future<void> _confirmarRegistro() async {
+    setState(() => isLoading = true);
+
+    bool success = await ApiService.confirmarRegistro(
+      emailPendiente,
+      codigoVerificacionController.text.trim(),
+      passwordController.text.trim(),
+    );
+
+    setState(() => isLoading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Registro confirmado. Ahora puedes iniciar sesión."),
+      ));
+      setState(() {
+        necesitaVerificacion = false;
+        emailController.clear();
+        passwordController.clear();
+        codigoVerificacionController.clear();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Código incorrecto o expirado."),
+      ));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Iniciar Sesión")),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: "Correo Electrónico"),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: "Contraseña"),
+              obscureText: true,
+            ),
+            if (necesitaVerificacion) ...[
+              const SizedBox(height: 10),
+              TextField(
+                controller: codigoVerificacionController,
+                decoration: const InputDecoration(labelText: "Código de Verificación"),
+              ),
+              const SizedBox(height: 10),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _confirmarRegistro,
+                      child: const Text("Confirmar Registro"),
+                    ),
+            ] else ...[
+              const SizedBox(height: 20),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _login,
+                      child: const Text("Ingresar"),
+                    ),
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+}

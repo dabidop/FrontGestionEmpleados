@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'views/login_screen.dart';
+import 'views/index_screen.dart';
+
+void main() {
+  runApp(GestionEmpleadosApp());
+}
+
+class GestionEmpleadosApp extends StatefulWidget {
+  @override
+  _GestionEmpleadosAppState createState() => _GestionEmpleadosAppState();
+}
+
+class _GestionEmpleadosAppState extends State<GestionEmpleadosApp> {
+  String? codigoEmpleado;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      codigoEmpleado = prefs.getString('codigo_empleado');
+      isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Gestión de Empleados',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: isLoading
+          ? Scaffold(body: Center(child: CircularProgressIndicator()))
+          : codigoEmpleado != null
+              ? IndexScreen()
+              : LoginScreen(),
+    );
+  }
+}
