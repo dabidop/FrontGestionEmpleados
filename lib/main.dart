@@ -3,11 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'views/login_screen.dart';
 import 'views/index_screen.dart';
 
+
 void main() {
-  runApp(GestionEmpleadosApp());
+  runApp(const GestionEmpleadosApp());
 }
 
 class GestionEmpleadosApp extends StatefulWidget {
+  const GestionEmpleadosApp({super.key});
+
   @override
   _GestionEmpleadosAppState createState() => _GestionEmpleadosAppState();
 }
@@ -37,10 +40,10 @@ class _GestionEmpleadosAppState extends State<GestionEmpleadosApp> {
       title: 'Gestión de Empleados',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: isLoading
-          ? Scaffold(body: Center(child: CircularProgressIndicator()))
+          ? const Scaffold(body: Center(child: CircularProgressIndicator()))
           : codigoEmpleado != null
-              ? IndexScreen()
-              : LoginScreen(),
+              ? const IndexScreen()
+              : const LoginScreen(),
     );
   }
 }

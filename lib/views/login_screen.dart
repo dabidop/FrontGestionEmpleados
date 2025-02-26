@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
           emailPendiente = response["email"];
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Código enviado a ${response["email"]}. Ingrésalo para continuar."),
+          content: Text("Código enviado a ${response["email"]}. Ingrésalo para continuar.<br>"),
         ));
       }
     } else {
