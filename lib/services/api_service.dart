@@ -6,7 +6,7 @@ import 'package:gestion_empleados/services/secure_storage_service.dart';
 class ApiService {
   static const String baseUrl = "http://localhost:5219/api/auth";
 
-  // ✅ Método para iniciar sesión o solicitar registro (NO TOCADO)
+  // ✅ Método para iniciar sesión o solicitar registro
     static Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),

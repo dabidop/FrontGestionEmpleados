@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/views/incapacidades_screen.dart';
 import 'package:gestion_empleados/views/login_screen.dart';
 import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/views/hojas_de_vida_screen.dart';
 import 'package:gestion_empleados/views/cartas_laborales_screen.dart';
 import 'package:gestion_empleados/views/colillas_nomina_screen.dart';
 import 'package:gestion_empleados/views/solicitudes_vacaciones_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IndexScreen extends StatefulWidget {
   const IndexScreen({super.key});
@@ -67,23 +69,73 @@ class _IndexScreenState extends State<IndexScreen> {
             ListTile(
               title: const Text('Hojas de Vida'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HojasDeVidaScreen(),
-                  ),
-                );
+                // Verificar que el perfil y el código del empleado estén disponibles
+                if (perfil != null && perfil!['codigo'] != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => HojasDeVidaScreen(
+                            codigoEmpleado:
+                                perfil!['codigo'], // ✅ Pasa el código del empleado
+                          ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Código de empleado no disponible'),
+                    ),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              title: const Text('Incapacidades'),
+              onTap: () async {
+                // 🔥 Obtener el código del empleado desde SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String? codigoEmpleado = prefs.getString('codigo_empleado');
+
+                if (codigoEmpleado != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => IncapacidadesScreen(
+                            codigoEmpleado: codigoEmpleado,
+                          ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Código de empleado no disponible'),
+                    ),
+                  );
+                }
               },
             ),
             ListTile(
               title: const Text('Cartas Laborales'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CartasLaboralesScreen(),
-                  ),
-                );
+                if (perfil != null && perfil!['codigo'] != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => CartaLaboralPage(
+                            codigoEmpleado: perfil!['codigo'],
+                          ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Código de empleado no disponible'),
+                    ),
+                  );
+                }
               },
             ),
             ListTile(
@@ -112,34 +164,40 @@ class _IndexScreenState extends State<IndexScreen> {
         ),
       ),
       // 🔥 Contenido principal: Información detallada del usuario
-      body: perfil == null
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Card(
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Información del Usuario",
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        // 🔥 Solo muestra los campos que EXISTEN en el JSON
-                        ...perfil!.entries.map((entry) => Text(
+      body:
+          perfil == null
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Card(
+                    elevation: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Información del Usuario",
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // 🔥 Solo muestra los campos que EXISTEN en el JSON
+                          ...perfil!.entries.map(
+                            (entry) => Text(
                               "${entry.key}: ${entry.value}",
                               style: const TextStyle(fontSize: 18),
-                            )),
-                      ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
     );
   }
 }

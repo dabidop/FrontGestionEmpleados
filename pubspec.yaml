@@ -37,6 +37,13 @@ dependencies:
   http: ^1.3.0
   shared_preferences: ^2.5.2
   flutter_secure_storage: ^5.0.2
+  flutter_pdfview: ^1.0.0 # Para previsualizar el PDF
+  path_provider: ^2.0.15 # Para obtener la ruta de almacenamiento
+  open_filex: ^4.6.0 # Para abrir el archivo PDF después de la descarga
+  url_launcher: ^6.0.20
+  universal_html: ^2.0.6
+  file_picker: ^5.2.3
+  open_file: ^3.2.1
 
 dev_dependencies:
   flutter_test:
