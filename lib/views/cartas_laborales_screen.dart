@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
-import 'dart:ui' as ui; // ✅ Import correcto
+import 'dart:ui' as ui;
 
 class CartaLaboralPage extends StatefulWidget {
   final String codigoEmpleado;
@@ -21,21 +21,83 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
   String? pdfUrl;
   String viewID = "pdfIframe-${UniqueKey().toString()}";
 
+  // 🔹 Controladores para los campos de entrada
+  TextEditingController destinatarioController = TextEditingController();
+  String empresaSeleccionada = "ALV"; // Valor por defecto
+
   @override
-  void initState() {
-    super.initState();
-    generarCartaLaboral();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Carta Laboral")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 🔹 Campo para ingresar el destinatario
+            Text("Destinatario:", style: TextStyle(fontWeight: FontWeight.bold)),
+            TextField(
+              controller: destinatarioController,
+              decoration: InputDecoration(
+                hintText: "Ingrese el nombre del destinatario",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // 🔹 Dropdown para seleccionar la empresa
+            Text("Seleccione la empresa:", style: TextStyle(fontWeight: FontWeight.bold)),
+            DropdownButton<String>(
+              value: empresaSeleccionada,
+              items: [
+                DropdownMenuItem(value: "ALV", child: Text("GRUPO ALV S.A.S")),
+                DropdownMenuItem(value: "DENIM", child: Text("DENIM LOVERS S.A.S")),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  empresaSeleccionada = value!;
+                });
+              },
+            ),
+            SizedBox(height: 20),
+
+            // 🔹 Botón para generar la carta laboral
+            Center(
+              child: ElevatedButton(
+                onPressed: generarCartaLaboral,
+                child: Text("Generar Carta Laboral"),
+              ),
+            ),
+
+            SizedBox(height: 30),
+
+            // 🔹 Si hay un PDF, mostrarlo
+            pdfUrl != null
+                ? Expanded(
+                    child: kIsWeb
+                        ? HtmlElementView(viewType: viewID)
+                        : Center(child: Text("Previsualización no disponible en esta plataforma")),
+                  )
+                : Center(child: Text("Ingrese los datos y genere la carta")),
+          ],
+        ),
+      ),
+      floatingActionButton: pdfUrl != null
+          ? FloatingActionButton(
+              onPressed: descargarPDF,
+              child: Icon(Icons.download),
+            )
+          : null,
+    );
   }
 
+  // 🔹 Función para generar la carta laboral con los datos ingresados
   Future<void> generarCartaLaboral() async {
-    // ✅ URL correcta del endpoint
-    String apiUrl = "http://localhost:5219/api/CartasLaborales/generar/${widget.codigoEmpleado}";
+    String apiUrl =
+        "http://localhost:5219/api/CartasLaborales/generar/${widget.codigoEmpleado}/${destinatarioController.text}/${empresaSeleccionada}";
 
-    // 🔒 Obtener el token almacenado
     String? token = await storage.read(key: "jwt_token");
-
     if (token == null) {
-      print("❌ Error: No se encontró el token JWT.");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: No se encontró el token de autenticación")),
       );
@@ -43,33 +105,22 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
     }
 
     try {
-      // ✅ Solicitud al endpoint correcto
       final respuesta = await http.get(
         Uri.parse(apiUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
+        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
       );
 
-      // ✅ Procesar la respuesta
       if (respuesta.statusCode == 200) {
-        // ✅ Convertir la respuesta a JSON
         final jsonData = jsonDecode(respuesta.body);
-
-        // ✅ Extraer la URL del PDF
         String urlArchivo = jsonData['url'];
-
-        // 🔥 Reemplazar `localhost` por una URL relativa para evitar problemas de CORS y HTTPS
         urlArchivo = urlArchivo.replaceAll("https://localhost:5219", "");
 
         setState(() {
           pdfUrl = urlArchivo;
         });
 
-        // 🔥 Registrar el `iframe` en el DOM solo en Flutter Web
+        // 🔹 Registrar el iframe solo en Flutter Web
         if (kIsWeb) {
-          // ✅ Forma correcta de registrar el iframe en Flutter Web
           ui.platformViewRegistry.registerViewFactory(
             viewID,
             (int viewId) => html.IFrameElement()
@@ -80,59 +131,31 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
           );
         }
       } else {
-        print("❌ Error: ${respuesta.reasonPhrase}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error al generar la carta laboral")),
         );
       }
     } catch (e) {
-      print("❌ Error en la solicitud: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error de conexión")),
       );
     }
   }
 
+  // 🔹 Función para descargar el PDF
   Future<void> descargarPDF() async {
     if (pdfUrl != null) {
-      // 🔥 Utiliza url_launcher para abrir el PDF en otra pestaña y permitir su descarga
       if (await canLaunch(pdfUrl!)) {
         await launch(pdfUrl!);
       } else {
-        print("❌ No se pudo abrir el enlace de descarga.");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("No se pudo abrir el enlace de descarga")),
         );
       }
     } else {
-      print("⚠️ No se encontró la URL del PDF.");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("No se encontró la URL del PDF")),
       );
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Carta Laboral"),
-      ),
-      body: pdfUrl != null
-          ? Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: kIsWeb
-                    ? HtmlElementView(viewType: viewID)
-                    : Center(child: Text("Previsualización no disponible en esta plataforma")),
-              ),
-            )
-          : Center(child: CircularProgressIndicator()),
-      floatingActionButton: FloatingActionButton(
-        onPressed: descargarPDF,
-        child: Icon(Icons.download),
-      ),
-    );
   }
 }
