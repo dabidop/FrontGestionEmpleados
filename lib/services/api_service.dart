@@ -7,7 +7,10 @@ class ApiService {
   static const String baseUrl = "http://localhost:5219/api/auth";
 
   // ✅ Método para iniciar sesión o solicitar registro
-    static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String email,
+    String password,
+  ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {"Content-Type": "application/json"},
@@ -22,7 +25,10 @@ class ApiService {
         String token = data['token'];
         await SecureStorageService.storeToken(token);
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('codigo_empleado', data['usuario']['codigo_empleado']);
+        await prefs.setString(
+          'codigo_empleado',
+          data['usuario']['codigo_empleado'],
+        );
         await prefs.setString('email', data['usuario']['email']);
 
         // 🔥 Imprimir el token para verificar
@@ -38,16 +44,19 @@ class ApiService {
     }
   }
 
-
   // ✅ Método para confirmar el código de verificación y registrar al usuario (NO TOCADO)
-  static Future<bool> confirmarRegistro(String email, String codigoVerificacion, String password) async {
+  static Future<bool> confirmarRegistro(
+    String email,
+    String codigoVerificacion,
+    String password,
+  ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/confirmar-registro'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "Email": email,
         "CodigoVerificacion": codigoVerificacion,
-        "Contrasena": password
+        "Contrasena": password,
       }),
     );
 
@@ -61,10 +70,9 @@ class ApiService {
     await prefs.remove('email');
   }
 
-    // ✅ Método para obtener el perfil del usuario autenticado
-    static Future<Map<String, dynamic>> getPerfil() async {
+  // ✅ Método para obtener el perfil del usuario autenticado
+  static Future<Map<String, dynamic>> getPerfil() async {
     String? token = await SecureStorageService.getToken();
-    print("🔥 Token leído: $token"); // ✅ Imprimir el token leído
 
     if (token == null) {
       return {"success": false, "message": "No hay token de autenticación."};
@@ -74,17 +82,40 @@ class ApiService {
       Uri.parse('http://localhost:5219/api/usuarios/perfil'),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
+        "Authorization": "Bearer $token",
       },
     );
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
+
+      // 🔥 Verificar si la clave "cargo" existe antes de acceder a ella
+      if (!jsonData.containsKey("cargo") || jsonData["cargo"] == null) {
+        print("⚠️ ERROR: No se encontró la clave 'cargo' en el perfil.");
+        return {
+          "success": false,
+          "message": "No se encontró el cargo del usuario.",
+        };
+      }
+
+      // 🔥 Limpiar espacios y asegurar comparación correcta
+      String cargo = jsonData["cargo"].toString().trim().toUpperCase();
+
+      // 🔥 Verificar si el usuario es aprobador
+      bool esAprobador =
+          cargo.contains("COORDINADOR") ||
+          cargo.contains("GERENTE") ||
+          cargo.contains("DIRECTOR");
+
+      jsonData["esAprobador"] = esAprobador;
+
+      // 🔥 Mensajes de depuración en consola
+      print("🔥 Cargo evaluado: ${jsonData["cargo"]}");
+      print("🔥 Resultado de esAprobador: $esAprobador");
+
       return jsonData;
     } else {
       return {"success": false, "message": "Error al obtener el perfil."};
     }
   }
-
-
 }
