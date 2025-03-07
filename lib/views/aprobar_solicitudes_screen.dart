@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_empleados/services/vacaciones_service.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'detalle_solicitud_screen.dart'; // ✅ Importa la pantalla de detalle
 
@@ -46,6 +47,7 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Aprobar Solicitudes")),
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())

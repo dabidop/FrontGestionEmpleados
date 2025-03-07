@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_empleados/services/incapacidades_service.dart';
 import 'package:gestion_empleados/views/crear_incapacidad_modal.dart';
 import 'package:gestion_empleados/views/detalle_incapacidad_screen.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class IncapacidadesScreen extends StatefulWidget {
@@ -44,6 +45,7 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Incapacidades')),
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())

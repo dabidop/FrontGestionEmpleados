@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_empleados/services/vacaciones_service.dart';
 import 'package:gestion_empleados/views/solicitar_vacaciones_screen.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SolicitudesVacacionesScreen extends StatefulWidget {
@@ -45,6 +46,7 @@ class _SolicitudesVacacionesScreenState extends State<SolicitudesVacacionesScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Solicitudes de Vacaciones")),
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : solicitudes.isEmpty

@@ -81,6 +81,9 @@ class VacacionesService {
               "codigo": aprobador["codigo"].toString().trim(),
               "nombre":
                   "${aprobador["nombre"].toString().trim()} ${aprobador["apellido"].toString().trim()}",
+              "cargo":
+                  aprobador["cargo"]?.toString().trim() ??
+                  "Sin cargo", // 🔥 Aquí aseguramos que el cargo nunca sea null
             },
           )
           .toList();

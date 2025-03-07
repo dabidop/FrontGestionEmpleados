@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui;
 
 class CartaLaboralPage extends StatefulWidget {
   final String codigoEmpleado;
@@ -18,6 +19,7 @@ class CartaLaboralPage extends StatefulWidget {
 
 class _CartaLaboralPageState extends State<CartaLaboralPage> {
   final storage = FlutterSecureStorage();
+  bool drawerAbierto = false;
   String? pdfUrl;
   String viewID = "pdfIframe-${UniqueKey().toString()}";
 
@@ -28,66 +30,109 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Carta Laboral")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 Campo para ingresar el destinatario
-            Text("Destinatario:", style: TextStyle(fontWeight: FontWeight.bold)),
-            TextField(
-              controller: destinatarioController,
-              decoration: InputDecoration(
-                hintText: "Ingrese el nombre del destinatario",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-
-            // 🔹 Dropdown para seleccionar la empresa
-            Text("Seleccione la empresa:", style: TextStyle(fontWeight: FontWeight.bold)),
-            DropdownButton<String>(
-              value: empresaSeleccionada,
-              items: [
-                DropdownMenuItem(value: "ALV", child: Text("GRUPO ALV S.A.S")),
-                DropdownMenuItem(value: "DENIM", child: Text("DENIM LOVERS S.A.S")),
-              ],
-              onChanged: (value) {
+      appBar: AppBar(
+        title: Text("Certificados Laborales"),
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
                 setState(() {
-                  empresaSeleccionada = value!;
+                  drawerAbierto = true;
                 });
               },
-            ),
-            SizedBox(height: 20),
-
-            // 🔹 Botón para generar la carta laboral
-            Center(
-              child: ElevatedButton(
-                onPressed: generarCartaLaboral,
-                child: Text("Generar Carta Laboral"),
-              ),
-            ),
-
-            SizedBox(height: 30),
-
-            // 🔹 Si hay un PDF, mostrarlo
-            pdfUrl != null
-                ? Expanded(
-                    child: kIsWeb
-                        ? HtmlElementView(viewType: viewID)
-                        : Center(child: Text("Previsualización no disponible en esta plataforma")),
-                  )
-                : Center(child: Text("Ingrese los datos y genere la carta")),
-          ],
+            );
+          },
         ),
       ),
-      floatingActionButton: pdfUrl != null
-          ? FloatingActionButton(
-              onPressed: descargarPDF,
-              child: Icon(Icons.download),
-            )
-          : null,
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
+      onDrawerChanged: (isOpen) {
+        setState(() {
+          drawerAbierto = isOpen;
+        });
+      },
+      body: SingleChildScrollView(
+        // 🔥 Ahora toda la pantalla puede desplazarse
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 🔹 Campo para ingresar el destinatario
+              Text(
+                "Destinatario:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextField(
+                controller: destinatarioController,
+                decoration: InputDecoration(
+                  hintText: "Ingrese el nombre del destinatario",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // 🔹 Dropdown para seleccionar la empresa
+              Text(
+                "Seleccione la empresa:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<String>(
+                value: empresaSeleccionada,
+                items: [
+                  DropdownMenuItem(
+                    value: "ALV",
+                    child: Text("GRUPO ALV S.A.S"),
+                  ),
+                  DropdownMenuItem(
+                    value: "DENIM",
+                    child: Text("DENIM LOVERS S.A.S"),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    empresaSeleccionada = value!;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+
+              // 🔹 Botón para generar la carta laboral
+              Center(
+                child: ElevatedButton(
+                  onPressed: generarCartaLaboral,
+                  child: Text("Generar Carta Laboral"),
+                ),
+              ),
+
+              SizedBox(height: 30),
+
+              // 🔹 Visor PDF (con tamaño fijo para evitar problemas)
+              pdfUrl != null && !drawerAbierto
+                  ? SizedBox(
+                    height: 600,
+                    child:
+                        kIsWeb
+                            ? HtmlElementView(viewType: viewID)
+                            : Center(
+                              child: Text(
+                                "Previsualización no disponible en esta plataforma",
+                              ),
+                            ),
+                  )
+                  : Center(child: Text("Ingrese los datos y genere la carta")),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton:
+          pdfUrl != null && !drawerAbierto
+              ? FloatingActionButton(
+                onPressed: descargarPDF,
+                child: Icon(Icons.download),
+              )
+              : null,
     );
   }
 
@@ -99,7 +144,9 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
     String? token = await storage.read(key: "jwt_token");
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: No se encontró el token de autenticación")),
+        SnackBar(
+          content: Text("Error: No se encontró el token de autenticación"),
+        ),
       );
       return;
     }
@@ -107,7 +154,10 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
     try {
       final respuesta = await http.get(
         Uri.parse(apiUrl),
-        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (respuesta.statusCode == 200) {
@@ -116,18 +166,21 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
         urlArchivo = urlArchivo.replaceAll("https://localhost:5219", "");
 
         setState(() {
-          pdfUrl = urlArchivo;
+          pdfUrl =
+              "$urlArchivo?timestamp=${DateTime.now().millisecondsSinceEpoch}";
+          viewID = "pdfIframe-${UniqueKey().toString()}"; // 🔥 Forzar recarga
         });
 
         // 🔹 Registrar el iframe solo en Flutter Web
         if (kIsWeb) {
           ui.platformViewRegistry.registerViewFactory(
             viewID,
-            (int viewId) => html.IFrameElement()
-              ..src = pdfUrl
-              ..style.border = 'none'
-              ..width = '100%'
-              ..height = '100%',
+            (int viewId) =>
+                html.IFrameElement()
+                  ..src = pdfUrl
+                  ..style.border = 'none'
+                  ..width = '100%'
+                  ..height = '100%',
           );
         }
       } else {
@@ -136,9 +189,9 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error de conexión")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error de conexión")));
     }
   }
 
@@ -153,9 +206,9 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("No se encontró la URL del PDF")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("No se encontró la URL del PDF")));
     }
   }
 }

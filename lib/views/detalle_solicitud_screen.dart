@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_empleados/services/vacaciones_service.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 
 class DetalleSolicitudScreen extends StatefulWidget {
   final Map<String, dynamic> solicitud;
@@ -47,6 +48,7 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Detalle Solicitud")),
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

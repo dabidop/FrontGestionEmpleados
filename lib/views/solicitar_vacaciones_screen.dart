@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_empleados/services/vacaciones_service.dart';
 import 'package:gestion_empleados/views/lista_vacaciones_screen.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SolicitarVacacionesScreen extends StatefulWidget {
@@ -115,6 +116,7 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Solicitar Vacaciones")),
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -174,7 +176,12 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
                   aprobadores.map((aprobador) {
                     return DropdownMenuItem<String>(
                       value: aprobador["codigo"],
-                      child: Text(aprobador["nombre"]!),
+                      child: Text(
+                        "${aprobador["nombre"]} - ${aprobador["cargo"]}",
+                        overflow:
+                            TextOverflow
+                                .ellipsis, // Evita que el texto se desborde
+                      ),
                     );
                   }).toList(),
               onChanged: (value) {

@@ -5,7 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
-import 'dart:ui' as ui; // ✅ Import correcto
+import 'dart:ui' as ui;
+import 'package:gestion_empleados/widgets/custom_drawer.dart'; // Importa el Drawer
 
 class HojasDeVidaScreen extends StatefulWidget {
   final String codigoEmpleado;
@@ -18,32 +19,31 @@ class HojasDeVidaScreen extends StatefulWidget {
 
 class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
   final storage = FlutterSecureStorage();
+  bool drawerAbierto = false;
   String? pdfUrl;
   String viewID = "pdfIframe-${UniqueKey().toString()}";
-
-  @override
-  void initState() {
-    super.initState();
-    generarHojaDeVida();
-  }
+  String empresaSeleccionada = "ALV"; // Valor por defecto
 
   Future<void> generarHojaDeVida() async {
-    // ✅ URL correcta del endpoint para Hojas de Vida
-    String apiUrl = "http://localhost:5219/api/HojasDeVida/generar/${widget.codigoEmpleado}";
+    String apiUrl =
+        "http://localhost:5219/api/HojasDeVida/generar/${widget.codigoEmpleado}/${empresaSeleccionada}";
 
-    // 🔒 Obtener el token almacenado
     String? token = await storage.read(key: "jwt_token");
-
     if (token == null) {
-      print("❌ Error: No se encontró el token JWT.");
+      print("❌ No se encontró el token JWT.");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: No se encontró el token de autenticación")),
+        SnackBar(
+          content: Text("Error: No se encontró el token de autenticación"),
+        ),
       );
       return;
     }
 
+    // 🔥 IMPRIMIMOS EL TOKEN Y LOS HEADERS PARA VERIFICARLO
+    print("🔥 Token enviado en la petición: $token");
+    print("🔥 URL de la petición: $apiUrl");
+
     try {
-      // ✅ Solicitud al endpoint correcto
       final respuesta = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -52,63 +52,61 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
         },
       );
 
-      // ✅ Procesar la respuesta
+      print("🔍 Código de respuesta HTTP: ${respuesta.statusCode}");
+      print("🔍 Cuerpo de la respuesta: ${respuesta.body}");
+
       if (respuesta.statusCode == 200) {
-        // ✅ Convertir la respuesta a JSON
         final jsonData = jsonDecode(respuesta.body);
-
-        // ✅ Extraer la URL del PDF
         String urlArchivo = jsonData['url'];
-
-        // 🔥 Reemplazar `localhost` por una URL relativa para evitar problemas de CORS y HTTPS
         urlArchivo = urlArchivo.replaceAll("https://localhost:5219", "");
 
         setState(() {
-          pdfUrl = urlArchivo;
+          pdfUrl =
+              "$urlArchivo?timestamp=${DateTime.now().millisecondsSinceEpoch}";
+          viewID =
+              "pdfIframe-${UniqueKey().toString()}"; // 🔥 Nuevo ID para evitar caché
         });
 
-        // 🔥 Registrar el `iframe` en el DOM solo en Flutter Web
         if (kIsWeb) {
-          // ✅ Forma correcta de registrar el iframe en Flutter Web
           ui.platformViewRegistry.registerViewFactory(
             viewID,
-            (int viewId) => html.IFrameElement()
-              ..src = pdfUrl
-              ..style.border = 'none'
-              ..width = '100%'
-              ..height = '100%',
+            (int viewId) =>
+                html.IFrameElement()
+                  ..src = pdfUrl
+                  ..style.border = 'none'
+                  ..width = '100%'
+                  ..height = '100%',
           );
         }
       } else {
-        print("❌ Error: ${respuesta.reasonPhrase}");
+        print(
+          "❌ Error al generar la hoja de vida: ${respuesta.statusCode} - ${respuesta.reasonPhrase}",
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error al generar la hoja de vida")),
         );
       }
     } catch (e) {
-      print("❌ Error en la solicitud: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error de conexión")),
-      );
+      print("❌ Error de conexión: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error de conexión")));
     }
   }
 
   Future<void> descargarPDF() async {
     if (pdfUrl != null) {
-      // 🔥 Utiliza url_launcher para abrir el PDF en otra pestaña y permitir su descarga
       if (await canLaunch(pdfUrl!)) {
         await launch(pdfUrl!);
       } else {
-        print("❌ No se pudo abrir el enlace de descarga.");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("No se pudo abrir el enlace de descarga")),
         );
       }
     } else {
-      print("⚠️ No se encontró la URL del PDF.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("No se encontró la URL del PDF")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("No se encontró la URL del PDF")));
     }
   }
 
@@ -116,23 +114,92 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hoja de Vida"),
+        title: Text("Hojas de Vida"),
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+                setState(() {
+                  drawerAbierto = true;
+                });
+              },
+            );
+          },
+        ),
       ),
-      body: pdfUrl != null
-          ? Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: kIsWeb
-                    ? HtmlElementView(viewType: viewID)
-                    : Center(child: Text("Previsualización no disponible en esta plataforma")),
+      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
+      onDrawerChanged: (isOpen) {
+        setState(() {
+          drawerAbierto = isOpen;
+        });
+      },
+      body: SingleChildScrollView(
+        // 🔥 Ahora puedes hacer scroll en la pantalla completa
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Seleccione la empresa:",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            )
-          : Center(child: CircularProgressIndicator()),
-      floatingActionButton: FloatingActionButton(
-        onPressed: descargarPDF,
-        child: Icon(Icons.download),
+              DropdownButton<String>(
+                value: empresaSeleccionada,
+                items: [
+                  DropdownMenuItem(
+                    value: "ALV",
+                    child: Text("GRUPO ALV S.A.S"),
+                  ),
+                  DropdownMenuItem(
+                    value: "DENIM",
+                    child: Text("DENIM LOVERS S.A.S"),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    empresaSeleccionada = value!;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: generarHojaDeVida,
+                  child: Text("Generar Hoja de Vida"),
+                ),
+              ),
+              SizedBox(height: 30),
+              pdfUrl != null && !drawerAbierto
+                  ? SizedBox(
+                    height: 600,
+                    child:
+                        kIsWeb
+                            ? HtmlElementView(viewType: viewID)
+                            : Center(
+                              child: Text(
+                                "Previsualización no disponible en esta plataforma",
+                              ),
+                            ),
+                  )
+                  : Center(
+                    child: Text(
+                      "Seleccione una empresa y genere la hoja de vida",
+                    ),
+                  ),
+            ],
+          ),
+        ),
       ),
+      floatingActionButton:
+          pdfUrl != null && !drawerAbierto
+              ? FloatingActionButton(
+                onPressed: descargarPDF,
+                child: Icon(Icons.download),
+              )
+              : null,
     );
   }
 }

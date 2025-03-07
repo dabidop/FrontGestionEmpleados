@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_empleados/services/incapacidades_service.dart';
+import 'package:gestion_empleados/widgets/custom_drawer.dart';
 
 class DetalleIncapacidadScreen extends StatefulWidget {
   final int id;
@@ -26,6 +27,8 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
       final datos = await IncapacidadesService.obtenerDetallesIncapacidad(
         widget.id,
       );
+      print("Valor recibido: ${datos['estadoIncapacidad']}");
+      print("Tipo de dato: ${datos['estadoIncapacidad'].runtimeType}");
       setState(() {
         detalles = datos;
         isLoading = false;
@@ -54,46 +57,50 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading || detalles == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Detalle de Incapacidad')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    bool estado = detalles!['estadoIncapacidad'] == true;
+
     return Scaffold(
       appBar: AppBar(title: Text('Detalle de Incapacidad')),
-      body:
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : detalles == null
-              ? Center(child: Text('No se encontraron detalles'))
-              : Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Incapacidad #${detalles!['idSolicitudIncapacidad']}',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text('Código Empleado: ${detalles!['codigoEmpleado']}'),
-                    Text(
-                      'Fecha Inicio: ${detalles!['fechaInicioIncapacidad']}',
-                    ),
-                    Text('Fecha Fin: ${detalles!['fechaFinIncapacidad']}'),
-                    Text('Fecha Solicitud: ${detalles!['fechaSolicitud']}'),
-                    Text('Nombre Archivo: ${detalles!['nombreArchivo']}'),
-                    Text('Tipo Archivo: ${detalles!['tipoArchivo']}'),
-                    Text(
-                      'Estado: ${detalles!['estadoIncapacidad'] ? "Vigente" : "Expirada"}',
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: _descargarArchivo,
-                      icon: Icon(Icons.download),
-                      label: Text('Descargar Archivo'),
-                    ),
-                  ],
-                ),
+      drawer: CustomDrawer(perfil: null),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Incapacidad #${detalles!['idSolicitudIncapacidad']}',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text('Código Empleado: ${detalles!['codigoEmpleado']}'),
+            Text('Fecha Inicio: ${detalles!['fechaInicioIncapacidad']}'),
+            Text('Fecha Fin: ${detalles!['fechaFinIncapacidad']}'),
+            Text('Fecha Solicitud: ${detalles!['fechaSolicitud']}'),
+            Text('Nombre Archivo: ${detalles!['nombreArchivo']}'),
+            Text('Tipo Archivo: ${detalles!['tipoArchivo']}'),
+            Text(
+              'Estado: ${estado ? "Vigente" : "Expirada"}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: estado ? Colors.green : Colors.red,
               ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _descargarArchivo,
+              icon: Icon(Icons.download),
+              label: Text('Descargar Archivo'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
