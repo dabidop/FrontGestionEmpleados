@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'views/login_screen.dart';
 import 'views/index_screen.dart';
+import 'package:intl/date_symbol_data_local.dart'; // 👈 Importación necesaria
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // 👈 Asegura la inicialización
+  await initializeDateFormatting('es', null); // 👈 Carga los datos del idioma español
   runApp(const GestionEmpleadosApp());
 }
 

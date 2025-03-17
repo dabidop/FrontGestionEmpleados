@@ -15,6 +15,15 @@ class CustomDrawer extends StatelessWidget {
 
   const CustomDrawer({Key? key, required this.perfil}) : super(key: key);
 
+  // Esto es para cargar el perfil cuando se abre el Drawer
+  Future<Map<String, dynamic>> obtenerPerfil() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return {
+      "codigo": prefs.getString("codigo_empleado"),
+      "esAprobador": prefs.getBool("esAprobador") ?? false,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(

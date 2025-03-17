@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/services/incapacidades_service.dart';
 import 'package:gestion_empleados/views/crear_incapacidad_modal.dart';
 import 'package:gestion_empleados/views/detalle_incapacidad_screen.dart';
 import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class IncapacidadesScreen extends StatefulWidget {
   final String codigoEmpleado;
@@ -17,11 +19,44 @@ class IncapacidadesScreen extends StatefulWidget {
 class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
   List<dynamic> incapacidades = [];
   bool isLoading = true;
+  Map<String, dynamic>? perfil;
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return "No disponible";
+
+    try {
+      DateTime date = DateTime.parse(dateStr);
+      return DateFormat("d MMMM, y", "es").format(date);
+      // Ejemplo de salida: "28 febrero, 2025"
+    } catch (e) {
+      print("❌ Error al formatear fecha: $e");
+      return "Formato inválido";
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _cargarIncapacidades();
+    _loadPerfil();
+  }
+
+  // ✅ Cargar los datos del perfil del usuario desde la API
+  Future<void> _loadPerfil() async {
+    try {
+      var data = await ApiService.getPerfil();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      if (data != null && data['codigo'] != null) {
+        await prefs.setString('codigo_empleado', data['codigo']);
+      }
+
+      setState(() {
+        perfil = data;
+      });
+    } catch (e) {
+      print('Error al cargar datos del perfil: $e');
+    }
   }
 
   Future<void> _cargarIncapacidades() async {
@@ -45,14 +80,14 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Incapacidades')),
-      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
+      drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())
               : ListView.builder(
                 itemCount: incapacidades.length,
                 itemBuilder: (context, index) {
-                  final incapacidad = incapacidades[index];
+                  final incapacidad = incapacidades.reversed.toList()[index]; 
                   return Card(
                     margin: EdgeInsets.all(10),
                     child: ListTile(
@@ -61,9 +96,8 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Empleado: ${incapacidad['codigoEmpleado']}'),
-                          Text(
-                            'Fecha: ${incapacidad['fechaInicio']} - ${incapacidad['fechaFin']}',
-                          ),
+                          Text('Desde: ${_formatDate(incapacidad['fechaInicio'])}'),
+                          Text('Hasta: ${_formatDate(incapacidad['fechaFin'])}'),
                           Text('Archivo: ${incapacidad['nombreArchivo']}'),
                           Text('Estado: ${incapacidad['estado']}'),
                         ],

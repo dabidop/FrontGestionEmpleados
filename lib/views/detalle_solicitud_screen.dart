@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/services/vacaciones_service.dart';
 import 'package:gestion_empleados/widgets/custom_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetalleSolicitudScreen extends StatefulWidget {
   final Map<String, dynamic> solicitud;
@@ -15,6 +17,31 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
   String estadoSeleccionado = "Aprobada"; // ✅ Opción por defecto
   final TextEditingController observacionesController = TextEditingController();
   bool enviando = false;
+  Map<String, dynamic>? perfil;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPerfil();
+  }
+
+  // ✅ Cargar los datos del perfil del usuario desde la API
+  Future<void> _loadPerfil() async {
+    try {
+      var data = await ApiService.getPerfil();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      if (data != null && data['codigo'] != null) {
+        await prefs.setString('codigo_empleado', data['codigo']);
+      }
+
+      setState(() {
+        perfil = data;
+      });
+    } catch (e) {
+      print('Error al cargar datos del perfil: $e');
+    }
+  }
 
   Future<void> actualizarEstado() async {
     setState(() {
@@ -48,7 +75,7 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Detalle Solicitud")),
-      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
+      drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

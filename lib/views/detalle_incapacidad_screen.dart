@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/services/incapacidades_service.dart';
 import 'package:gestion_empleados/widgets/custom_drawer.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetalleIncapacidadScreen extends StatefulWidget {
   final int id;
@@ -15,11 +18,44 @@ class DetalleIncapacidadScreen extends StatefulWidget {
 class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
   Map<String, dynamic>? detalles;
   bool isLoading = true;
+  Map<String, dynamic>? perfil;
 
   @override
   void initState() {
     super.initState();
+    _loadPerfil();
     _cargarDetalles();
+  }
+
+  // ✅ Cargar los datos del perfil del usuario desde la API
+  Future<void> _loadPerfil() async {
+    try {
+      var data = await ApiService.getPerfil();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      if (data != null && data['codigo'] != null) {
+        await prefs.setString('codigo_empleado', data['codigo']);
+      }
+
+      setState(() {
+        perfil = data;
+      });
+    } catch (e) {
+      print('Error al cargar datos del perfil: $e');
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return "No disponible";
+
+    try {
+      DateTime date = DateTime.parse(dateStr);
+      return DateFormat("d MMMM, y", "es").format(date);
+      // Ejemplo de salida: "28 febrero, 2025"
+    } catch (e) {
+      print("❌ Error al formatear fecha: $e");
+      return "Formato inválido";
+    }
   }
 
   Future<void> _cargarDetalles() async {
@@ -64,11 +100,13 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
       );
     }
 
-    bool estado = detalles!['estadoIncapacidad'] == true;
+    bool estado = DateTime.parse(
+      detalles!['fechaFinIncapacidad'],
+    ).isAfter(DateTime.now());
 
     return Scaffold(
       appBar: AppBar(title: Text('Detalle de Incapacidad')),
-      drawer: CustomDrawer(perfil: null),
+      drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -80,9 +118,13 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
             ),
             SizedBox(height: 10),
             Text('Código Empleado: ${detalles!['codigoEmpleado']}'),
-            Text('Fecha Inicio: ${detalles!['fechaInicioIncapacidad']}'),
-            Text('Fecha Fin: ${detalles!['fechaFinIncapacidad']}'),
-            Text('Fecha Solicitud: ${detalles!['fechaSolicitud']}'),
+            Text(
+              'Fecha Inicio: ${_formatDate(detalles!['fechaInicioIncapacidad'])}',
+            ),
+            Text('Fecha Fin: ${_formatDate(detalles!['fechaFinIncapacidad'])}'),
+            Text(
+              'Fecha Solicitud: ${_formatDate(detalles!['fechaSolicitud'])}',
+            ),
             Text('Nombre Archivo: ${detalles!['nombreArchivo']}'),
             Text('Tipo Archivo: ${detalles!['tipoArchivo']}'),
             Text(

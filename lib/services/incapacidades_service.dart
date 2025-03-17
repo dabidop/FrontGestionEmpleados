@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:gestion_empleados/services/secure_storage_service.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart' as html;
 
 class IncapacidadesService {
   static const String baseUrl = "http://localhost:5219/api/Incapacidades";
@@ -106,16 +109,29 @@ class IncapacidadesService {
     );
 
     if (response.statusCode == 200) {
-      // 🔥 Obtener directorio de descarga
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/archivo_incapacidad_$id.pdf';
+      Uint8List bytes = response.bodyBytes;
+      String fileName = "incapacidad_$id.pdf";
 
-      // 🔥 Guardar el archivo
-      final file = File(filePath);
-      await file.writeAsBytes(response.bodyBytes);
+      if (kIsWeb) {
+        // 📂 **Descarga en Web**
+        final blob = html.Blob([bytes], response.headers['content-type']);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute("download", fileName)
+          ..click();
 
-      // 🔥 Abrir el archivo descargado
-      await OpenFile.open(filePath);
+        html.Url.revokeObjectUrl(url);
+      } else {
+        // 📂 **Descarga en Android / iOS / Windows / Linux / Mac**
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+
+        // 🔥 **Abrir el archivo automáticamente**
+        await OpenFile.open(filePath);
+      }
     } else {
       throw Exception('Error al descargar el archivo');
     }

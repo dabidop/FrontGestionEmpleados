@@ -4,6 +4,39 @@ import 'package:gestion_empleados/services/secure_storage_service.dart';
 
 class VacacionesService {
   static const String baseUrl = "http://localhost:5219/api/Vacaciones";
+  // 🔥 Caché de nombres de empleados
+  static Map<String, String> cacheNombresEmpleados = {};
+
+  static Future<String> obtenerNombreEmpleado(String codigoEmpleado) async {
+    // 🔥 1️⃣ Si ya tenemos el nombre en caché, lo devolvemos sin llamar a la API
+    if (cacheNombresEmpleados.containsKey(codigoEmpleado)) {
+      return cacheNombresEmpleados[codigoEmpleado]!;
+    }
+
+    // 🔥 2️⃣ Si no está en caché, hacemos la solicitud a la API
+    String? token = await SecureStorageService.getToken();
+    final response = await http.get(
+      Uri.parse("http://localhost:5219/api/usuarios/perfil"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = jsonDecode(response.body);
+
+      // 🔥 3️⃣ Guardamos el nombre en caché para futuras consultas
+      String nombreCompleto =
+          "${data['nombre']} ${data['nombre2'] ?? ''} ${data['apellido']} ${data['apellido2'] ?? ''}"
+              .trim();
+      cacheNombresEmpleados[codigoEmpleado] = nombreCompleto;
+
+      return nombreCompleto;
+    } else {
+      return "Desconocido";
+    }
+  }
 
   // ✅ 1️⃣ Obtener solicitudes pendientes para el aprobador logeado
   static Future<List<dynamic>> obtenerSolicitudesPendientes(

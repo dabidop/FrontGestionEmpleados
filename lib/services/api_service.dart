@@ -5,6 +5,7 @@ import 'package:gestion_empleados/services/secure_storage_service.dart';
 
 class ApiService {
   static const String baseUrl = "http://localhost:5219/api/auth";
+  
 
   // ✅ Método para iniciar sesión o solicitar registro
   static Future<Map<String, dynamic>> login(
@@ -108,6 +109,9 @@ class ApiService {
           cargo.contains("DIRECTOR");
 
       jsonData["esAprobador"] = esAprobador;
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('esAprobador', esAprobador); // 🔥 Guardamos `esAprobador`
 
       // 🔥 Mensajes de depuración en consola
       print("🔥 Cargo evaluado: ${jsonData["cargo"]}");

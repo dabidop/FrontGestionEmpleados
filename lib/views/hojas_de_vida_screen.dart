@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
@@ -23,6 +25,31 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
   String? pdfUrl;
   String viewID = "pdfIframe-${UniqueKey().toString()}";
   String empresaSeleccionada = "ALV"; // Valor por defecto
+  Map<String, dynamic>? perfil;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPerfil();
+  }
+
+  // ✅ Cargar los datos del perfil del usuario desde la API
+  Future<void> _loadPerfil() async {
+    try {
+      var data = await ApiService.getPerfil();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      if (data != null && data['codigo'] != null) {
+        await prefs.setString('codigo_empleado', data['codigo']);
+      }
+
+      setState(() {
+        perfil = data;
+      });
+    } catch (e) {
+      print('Error al cargar datos del perfil: $e');
+    }
+  }
 
   Future<void> generarHojaDeVida() async {
     String apiUrl =
@@ -129,7 +156,7 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
           },
         ),
       ),
-      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
+      drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       onDrawerChanged: (isOpen) {
         setState(() {
           drawerAbierto = isOpen;

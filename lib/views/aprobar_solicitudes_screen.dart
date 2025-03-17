@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/services/vacaciones_service.dart';
 import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,11 +17,31 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
   List<dynamic> solicitudes = [];
   bool isLoading = true;
   String? codigoAprobador;
+  Map<String, dynamic>? perfil;
 
   @override
   void initState() {
     super.initState();
     cargarSolicitudes();
+    _loadPerfil();
+  }
+
+  // ✅ Cargar los datos del perfil del usuario desde la API
+  Future<void> _loadPerfil() async {
+    try {
+      var data = await ApiService.getPerfil();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      if (data != null && data['codigo'] != null) {
+        await prefs.setString('codigo_empleado', data['codigo']);
+      }
+
+      setState(() {
+        perfil = data;
+      });
+    } catch (e) {
+      print('Error al cargar datos del perfil: $e');
+    }
   }
 
   Future<void> cargarSolicitudes() async {
@@ -33,12 +54,24 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
             await VacacionesService.obtenerSolicitudesPendientes(
               codigoAprobador!,
             );
+
+        // 🔥🔥🔥 PRINT PARA DEPURAR 🔥🔥🔥
+        print("🚀 Datos recibidos en Flutter:");
+        for (var solicitud in data) {
+          print(
+            "Empleado: ${solicitud["nombreCompleto"]} | Días: ${solicitud["diasSolicitados"]}",
+          );
+        }
+
         setState(() {
           solicitudes = data;
           isLoading = false;
         });
       } catch (e) {
         print("⚠️ Error al cargar solicitudes: $e");
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
@@ -47,7 +80,7 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Aprobar Solicitudes")),
-      drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
+      drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -57,9 +90,12 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
                 itemCount: solicitudes.length,
                 itemBuilder: (context, index) {
                   var solicitud = solicitudes[index];
+
                   return Card(
                     child: ListTile(
-                      title: Text("Empleado: ${solicitud['codigoEmpleado']}"),
+                      title: Text(
+                        "Empleado: ${solicitud['nombreCompleto'] ?? 'Desconocido'}",
+                      ),
                       subtitle: Text(
                         "Días solicitados: ${solicitud['diasSolicitados']}",
                       ),
