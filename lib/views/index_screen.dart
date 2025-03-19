@@ -154,6 +154,30 @@ class _IndexScreenState extends State<IndexScreen> {
     return "\$ ${format.format(value)} pesos"; // 🔥 Asegura que el signo esté antes
   }
 
+  // 📌 Función para convertir el tipo de contrato y el sexo en un valor más legible
+  String _formatValue(String? key, String? value) {
+    if (key == "contrato") {
+      switch (value?.trim().toUpperCase()) {
+        case "INDEF":
+          return "Indefinido";
+        case "FIJO":
+          return "Fijo";
+        default:
+          return "Desconocido";
+      }
+    } else if (key == "sexo") {
+      switch (value?.trim().toUpperCase()) {
+        case "F":
+          return "Femenino";
+        case "M":
+          return "Masculino";
+        default:
+          return "No especificado";
+      }
+    }
+    return value ?? "No disponible";
+  }
+
   // 📌 Construye las listas de información en columnas
   Widget _buildInfoList(
     bool isLeft,
@@ -196,13 +220,13 @@ class _IndexScreenState extends State<IndexScreen> {
 
     List<Widget> columna3 = [
       _buildInfoTile(Icons.location_city, "Dirección", perfil?["direccion"]),
-      _buildInfoTile(Icons.article, "Tipo de contrato", perfil?["contrato"]),
+      _buildInfoTile(Icons.article, "Tipo de contrato", _formatValue("contrato", perfil?["contrato"])),
       _buildInfoTile(
         Icons.calendar_today,
         "Fecha de ingreso",
         _formatDate(perfil?["fecha_ingreso"]),
       ),
-      _buildInfoTile(Icons.transgender, "Sexo", perfil?["sexo"]),
+      _buildInfoTile(Icons.transgender, "Sexo", _formatValue("sexo", perfil?["sexo"])),
     ];
 
     // 📌 Si la pantalla es menor a 500px, mostrar en una sola columna

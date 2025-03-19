@@ -3,6 +3,7 @@ import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:gestion_empleados/services/secure_storage_service.dart';
+import 'package:gestion_empleados/services/incapacidades_service.dart';
 
 class IncapacitadosScreen extends StatefulWidget {
   const IncapacitadosScreen({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class _IncapacitadosScreenState extends State<IncapacitadosScreen> {
 
   Future<void> _fetchIncapacitados() async {
     String? token = await SecureStorageService.getToken();
-    print("🔹 Token enviado en Incapacitados: $token"); // Debug
+    print("🔹 Token enviado en Incapacitados: $token");
 
     final response = await http.get(
       Uri.parse("http://localhost:5219/api/Incapacidades/incapacitados"),
@@ -40,7 +41,6 @@ class _IncapacitadosScreenState extends State<IncapacitadosScreen> {
       List<dynamic> data = json.decode(response.body);
 
       setState(() {
-        // 🔥 Manejo de valores nulos antes de asignar la lista
         incapacitados = data.map((incapacidad) {
           return {
             'id': incapacidad['idSolicitudIncapacidad'] ?? 0,
@@ -51,6 +51,7 @@ class _IncapacitadosScreenState extends State<IncapacitadosScreen> {
             'cargo': incapacidad['cargo']?.trim() ?? "Sin cargo",
             'email': incapacidad['email']?.trim() ?? "No disponible",
             'estado': (incapacidad['estadoIncapacidad'] == true) ? "Vigente" : "Expirada",
+            'nombreArchivo': incapacidad['nombreArchivo'] ?? "", // ✅ Nombre del archivo
           };
         }).toList();
 
@@ -66,6 +67,20 @@ class _IncapacitadosScreenState extends State<IncapacitadosScreen> {
     } else {
       setState(() => isLoading = false);
       print("⚠️ Error al obtener incapacitados: ${response.statusCode}");
+    }
+  }
+
+  Future<void> _descargarArchivo(int id) async {
+    try {
+      await IncapacidadesService.descargarArchivo(id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('📥 Archivo descargado con éxito')),
+      );
+    } catch (e) {
+      print("⚠️ Error al descargar archivo: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ Error al descargar el archivo')),
+      );
     }
   }
 
@@ -94,13 +109,37 @@ class _IncapacitadosScreenState extends State<IncapacitadosScreen> {
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           child: ListTile(
-                            title: Text(empleado['nombre']),
-                            subtitle: Text("Cargo: ${empleado['cargo']}"),
+                            title: Text(
+                              empleado['nombre'],
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Cargo: ${empleado['cargo']}"),
+                                const SizedBox(height: 5),
+                                empleado['nombreArchivo'].isNotEmpty
+                                    ? ElevatedButton.icon(
+                                        onPressed: () => _descargarArchivo(empleado['id']),
+                                        icon: const Icon(Icons.download),
+                                        label: const Text("Descargar Comprobante"),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        ),
+                                      )
+                                    : const Text(
+                                        "❌ Sin comprobante",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                              ],
+                            ),
                             trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Desde: ${_formatDate(empleado['fechaInicio'])}"),
-                                Text("Hasta: ${_formatDate(empleado['fechaFin'])}"),
+                                Text(
+                                  "Hasta: ${_formatDate(empleado['fechaFin'])}",
+                                  style: const TextStyle(fontSize: 13),
+                                ),
                               ],
                             ),
                           ),

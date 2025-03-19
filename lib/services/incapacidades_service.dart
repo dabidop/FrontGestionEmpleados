@@ -108,18 +108,51 @@ class IncapacidadesService {
       headers: {'Authorization': 'Bearer $token'},
     );
 
+    // 🔹 Imprimir todos los headers recibidos
+    print("🔹 Headers completos: ${response.headers}");
+
     if (response.statusCode == 200) {
       Uint8List bytes = response.bodyBytes;
-      String fileName = "incapacidad_$id.pdf";
+
+      // 🔹 Verificar y extraer headers completos
+      print("🔹 Headers recibidos: ${response.headers}");
+
+      String? disposition;
+      response.headers.forEach((key, value) {
+        if (key.toLowerCase() == 'content-disposition') {
+          disposition = value;
+        }
+      });
+
+      if (disposition == null) {
+        print("⚠️ No se encontró 'content-disposition' en los headers.");
+        return;
+      }
+
+      print("✅ Content-Disposition encontrado: $disposition");
+
+      // 🔹 Extraer nombre de archivo sin usar expresión regular
+      String fileName = "archivo_$id"; // Nombre por defecto
+
+      List<String> parts = disposition?.split(';') ?? [];
+      for (var part in parts) {
+        if (part.trim().toLowerCase().startsWith("filename=")) {
+          fileName = part.split('=')[1].replaceAll('"', '').trim();
+          break;
+        }
+      }
+
+      print("📂 Nombre del archivo detectado: $fileName");
 
       if (kIsWeb) {
         // 📂 **Descarga en Web**
         final blob = html.Blob([bytes], response.headers['content-type']);
         final url = html.Url.createObjectUrlFromBlob(blob);
-        
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute("download", fileName)
-          ..click();
+
+        final anchor =
+            html.AnchorElement(href: url)
+              ..setAttribute("download", fileName)
+              ..click();
 
         html.Url.revokeObjectUrl(url);
       } else {
@@ -133,6 +166,7 @@ class IncapacidadesService {
         await OpenFile.open(filePath);
       }
     } else {
+      print("❌ Error al descargar el archivo: ${response.statusCode}");
       throw Exception('Error al descargar el archivo');
     }
   }
