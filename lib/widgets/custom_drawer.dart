@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_empleados/views/incapacidades_screen.dart';
+import 'package:gestion_empleados/views/incapacitados_screen.dart';
 import 'package:gestion_empleados/views/index_screen.dart';
 import 'package:gestion_empleados/views/lista_vacaciones_screen.dart';
 import 'package:gestion_empleados/views/login_screen.dart';
@@ -8,6 +9,7 @@ import 'package:gestion_empleados/views/cartas_laborales_screen.dart';
 import 'package:gestion_empleados/views/colillas_nomina_screen.dart';
 import 'package:gestion_empleados/views/aprobar_solicitudes_screen.dart';
 import 'package:gestion_empleados/services/api_service.dart';
+import 'package:gestion_empleados/views/vacacionantes_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -173,6 +175,32 @@ class CustomDrawer extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ColillasNominaScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.beach_access),
+            title: const Text('Vacacionantes'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VacacionantesScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.health_and_safety),
+            title: const Text('Incapacitados'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const IncapacitadosScreen(),
                 ),
               );
             },

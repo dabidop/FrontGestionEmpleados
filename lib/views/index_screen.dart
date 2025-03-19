@@ -148,6 +148,12 @@ class _IndexScreenState extends State<IndexScreen> {
     );
   }
 
+  // 📌 Función para formatear el dinero en pesos colombianos
+  String _formatCurrency(double value) {
+    final format = NumberFormat("#,##0", "es_CO"); // 🔹 Formato sin decimales
+    return "\$ ${format.format(value)} pesos"; // 🔥 Asegura que el signo esté antes
+  }
+
   // 📌 Construye las listas de información en columnas
   Widget _buildInfoList(
     bool isLeft,
@@ -179,12 +185,12 @@ class _IndexScreenState extends State<IndexScreen> {
       _buildInfoTile(
         Icons.attach_money,
         "Valor por Hora",
-        "\$${valorHora.toStringAsFixed(2)}",
+        _formatCurrency(valorHora),
       ),
       _buildInfoTile(
         Icons.monetization_on,
         "Salario base",
-        "\$${salario.toStringAsFixed(2)}",
+        _formatCurrency(salario),
       ),
     ];
 
