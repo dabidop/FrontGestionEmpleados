@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui;
 import 'package:gestion_empleados/widgets/custom_drawer.dart'; // Importa el Drawer
 
 class HojasDeVidaScreen extends StatefulWidget {
@@ -85,39 +85,58 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
       if (respuesta.statusCode == 200) {
         final jsonData = jsonDecode(respuesta.body);
         String urlArchivo = jsonData['url'];
-        urlArchivo = urlArchivo.replaceAll("https://localhost:5219", "");
-
-        setState(() {
-          pdfUrl =
-              "$urlArchivo?timestamp=${DateTime.now().millisecondsSinceEpoch}";
-          viewID =
-              "pdfIframe-${UniqueKey().toString()}"; // 🔥 Nuevo ID para evitar caché
-        });
-
-        if (kIsWeb) {
-          ui.platformViewRegistry.registerViewFactory(
-            viewID,
-            (int viewId) =>
-                html.IFrameElement()
-                  ..src = pdfUrl
-                  ..style.border = 'none'
-                  ..width = '100%'
-                  ..height = '100%',
-          );
-        }
+        visualizarPDF(urlArchivo);
       } else {
-        print(
-          "❌ Error al generar la hoja de vida: ${respuesta.statusCode} - ${respuesta.reasonPhrase}",
-        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error al generar la hoja de vida")),
         );
       }
     } catch (e) {
-      print("❌ Error de conexión: $e");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error de conexión")));
+    }
+  }
+
+  void visualizarPDF(String url) async {
+    if (kIsWeb) {
+      // 🚀 WEB: Usa iframe en la misma vista
+      setState(() {
+        pdfUrl = "$url?timestamp=${DateTime.now().millisecondsSinceEpoch}";
+        viewID = "pdfIframe-${UniqueKey().toString()}";
+      });
+
+      ui.platformViewRegistry.registerViewFactory(viewID, (int viewId) {
+        final iframe =
+            html.IFrameElement()
+              ..src = pdfUrl
+              ..style.border = 'none'
+              ..style.width = '100%'
+              ..style.height = '600px'
+              ..style.visibility = 'hidden';
+
+        iframe.onLoad.listen((event) {
+          Future.delayed(Duration(milliseconds: 200), () {
+            iframe.style.visibility = 'visible';
+            setState(() {});
+          });
+        });
+
+        return iframe;
+      });
+
+      Future.delayed(Duration(milliseconds: 300), () {
+        setState(() {});
+      });
+    } else {
+      // 📱 MÓVIL: Abrir en visor de PDF
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("No se pudo abrir el PDF")));
+      }
     }
   }
 
@@ -220,13 +239,6 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
           ),
         ),
       ),
-      floatingActionButton:
-          pdfUrl != null && !drawerAbierto
-              ? FloatingActionButton(
-                onPressed: descargarPDF,
-                child: Icon(Icons.download),
-              )
-              : null,
     );
   }
 }

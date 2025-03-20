@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
 import 'dart:ui_web' as ui;
+import 'dart:ui';
+
 
 class CartaLaboralPage extends StatefulWidget {
   final String codigoEmpleado;
@@ -136,30 +138,26 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
               SizedBox(height: 30),
 
               // 🔹 Visor PDF (con tamaño fijo para evitar problemas)
-              pdfUrl != null && !drawerAbierto
-                  ? SizedBox(
-                    height: 600,
-                    child:
-                        kIsWeb
-                            ? HtmlElementView(viewType: viewID)
-                            : Center(
-                              child: Text(
-                                "Previsualización no disponible en esta plataforma",
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10), // 🆕 Margen lateral
+                child: pdfUrl != null && !drawerAbierto
+                    ? SizedBox(
+                      height: 600,
+                      child:
+                          kIsWeb
+                              ? HtmlElementView(viewType: viewID)
+                              : Center(
+                                child: Text(
+                                  "Previsualización no disponible en esta plataforma",
+                                ),
                               ),
-                            ),
-                  )
-                  : Center(child: Text("Ingrese los datos y genere la carta")),
+                    )
+                    : Center(child: Text("Ingrese los datos y genere la carta")),
+              ),
             ],
           ),
         ),
       ),
-      floatingActionButton:
-          pdfUrl != null && !drawerAbierto
-              ? FloatingActionButton(
-                onPressed: descargarPDF,
-                child: Icon(Icons.download),
-              )
-              : null,
     );
   }
 
