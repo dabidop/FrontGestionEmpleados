@@ -70,7 +70,7 @@ class CustomDrawer extends StatelessWidget {
               String? codigoEmpleado =
                   perfil?['codigo'] ?? prefs.getString('codigo_empleado');
 
-              print("🔍 Código de empleado antes de navegar: $codigoEmpleado");
+              //print("🔍 Código de empleado antes de navegar: $codigoEmpleado");
 
               if (codigoEmpleado != null) {
                 Navigator.pop(context);
@@ -99,7 +99,7 @@ class CustomDrawer extends StatelessWidget {
               String? codigoEmpleado =
                   perfil?['codigo'] ?? prefs.getString('codigo_empleado');
 
-              print("🔍 Código de empleado antes de navegar: $codigoEmpleado");
+              //print("🔍 Código de empleado antes de navegar: $codigoEmpleado");
 
               if (codigoEmpleado != null) {
                 Navigator.pop(context);

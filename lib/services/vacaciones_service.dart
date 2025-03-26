@@ -60,10 +60,10 @@ class VacacionesService {
 
     if (response.statusCode == 200) {
       List<dynamic> solicitudes = jsonDecode(response.body);
-      print("🔥 Solicitudes filtradas: ${solicitudes.length}");
+      //print("🔥 Solicitudes filtradas: ${solicitudes.length}");
       return solicitudes;
     } else {
-      print("⚠️ Error al obtener solicitudes: ${response.statusCode}");
+      //print("⚠️ Error al obtener solicitudes: ${response.statusCode}");
       return [];
     }
   }
@@ -179,7 +179,7 @@ class VacacionesService {
     if (response.statusCode == 200) {
       return true;
     } else {
-      print("Error al solicitar vacaciones: ${response.body}");
+      //print("Error al solicitar vacaciones: ${response.body}");
       return false;
     }
   }

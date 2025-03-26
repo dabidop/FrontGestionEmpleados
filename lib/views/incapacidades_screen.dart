@@ -29,7 +29,7 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
       return DateFormat("d MMMM, y", "es").format(date);
       // Ejemplo de salida: "28 febrero, 2025"
     } catch (e) {
-      print("❌ Error al formatear fecha: $e");
+      //print("❌ Error al formatear fecha: $e");
       return "Formato inválido";
     }
   }
@@ -55,7 +55,7 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
@@ -69,7 +69,7 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error: $e');
+      //print('Error: $e');
       setState(() {
         isLoading = false;
       });
@@ -95,7 +95,8 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Empleado: ${incapacidad['codigoEmpleado']}'),
+                          Text('Empleado: ${perfil?['nombre'] ?? 'No disponible'} ${perfil?['nombre2']} ${perfil?['apellido']} ${perfil?['apellido2']}'),
+                          Text('Código de empleado: ${incapacidad['codigoEmpleado']}'),
                           Text('Desde: ${_formatDate(incapacidad['fechaInicio'])}'),
                           Text('Hasta: ${_formatDate(incapacidad['fechaFin'])}'),
                           Text('Archivo: ${incapacidad['nombreArchivo']}'),

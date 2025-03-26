@@ -41,7 +41,7 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
@@ -53,7 +53,7 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
       return DateFormat("d MMMM, y", "es").format(date);
       // Ejemplo de salida: "28 febrero, 2025"
     } catch (e) {
-      print("❌ Error al formatear fecha: $e");
+      //print("❌ Error al formatear fecha: $e");
       return "Formato inválido";
     }
   }
@@ -63,14 +63,14 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
       final datos = await IncapacidadesService.obtenerDetallesIncapacidad(
         widget.id,
       );
-      print("Valor recibido: ${datos['estadoIncapacidad']}");
-      print("Tipo de dato: ${datos['estadoIncapacidad'].runtimeType}");
+      //print("Valor recibido: ${datos['estadoIncapacidad']}");
+      //print("Tipo de dato: ${datos['estadoIncapacidad'].runtimeType}");
       setState(() {
         detalles = datos;
         isLoading = false;
       });
     } catch (e) {
-      print('Error al cargar detalles: $e');
+      //print('Error al cargar detalles: $e');
       setState(() {
         isLoading = false;
       });
@@ -84,7 +84,7 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text('Archivo descargado con éxito')));
     } catch (e) {
-      print('Error al descargar el archivo: $e');
+      //print('Error al descargar el archivo: $e');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error al descargar el archivo')));
@@ -118,6 +118,7 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
             ),
             SizedBox(height: 10),
             Text('Código Empleado: ${detalles!['codigoEmpleado']}'),
+            Text('Empleado: ${perfil?['nombre'] ?? 'No disponible'} ${perfil?['nombre2']} ${perfil?['apellido']} ${perfil?['apellido2']}'),
             Text(
               'Fecha Inicio: ${_formatDate(detalles!['fechaInicioIncapacidad'])}',
             ),

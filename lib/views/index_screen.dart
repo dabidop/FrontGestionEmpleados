@@ -21,6 +21,98 @@ class _IndexScreenState extends State<IndexScreen> {
     _loadPerfil();
   }
 
+  void _abrirModalCambiarContrasena() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final actualController = TextEditingController();
+        final nuevaController = TextEditingController();
+        final confirmarController = TextEditingController();
+
+        return AlertDialog(
+          title: Text("Cambiar contraseña"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: actualController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Contraseña actual",
+                    prefixIcon: Icon(Icons.lock),
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: nuevaController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Nueva contraseña",
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: confirmarController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Confirmar nueva contraseña",
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancelar"),
+            ),
+            ElevatedButton(
+              child: Text("Guardar"),
+              onPressed: () async {
+                final actual = actualController.text.trim();
+                final nueva = nuevaController.text.trim();
+                final confirmar = confirmarController.text.trim();
+
+                if (actual.isEmpty || nueva.isEmpty || confirmar.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Todos los campos son obligatorios"),
+                    ),
+                  );
+                  return;
+                }
+
+                if (nueva != confirmar) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Las contraseñas nuevas no coinciden"),
+                    ),
+                  );
+                  return;
+                }
+
+                final ok = await ApiService.cambiarContrasena(actual, nueva);
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      ok
+                          ? "Contraseña actualizada correctamente"
+                          : "Error al cambiar la contraseña",
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // ✅ Cargar los datos del perfil del usuario desde la API
   Future<void> _loadPerfil() async {
     try {
@@ -35,7 +127,7 @@ class _IndexScreenState extends State<IndexScreen> {
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
@@ -216,17 +308,42 @@ class _IndexScreenState extends State<IndexScreen> {
         "Salario base",
         _formatCurrency(salario),
       ),
+      _buildInfoTile(Icons.location_city, "Dirección", perfil?["direccion"]),
     ];
 
     List<Widget> columna3 = [
-      _buildInfoTile(Icons.location_city, "Dirección", perfil?["direccion"]),
-      _buildInfoTile(Icons.article, "Tipo de contrato", _formatValue("contrato", perfil?["contrato"])),
+      _buildInfoTile(
+        Icons.article,
+        "Tipo de contrato",
+        _formatValue("contrato", perfil?["contrato"]),
+      ),
       _buildInfoTile(
         Icons.calendar_today,
         "Fecha de ingreso",
         _formatDate(perfil?["fecha_ingreso"]),
       ),
-      _buildInfoTile(Icons.transgender, "Sexo", _formatValue("sexo", perfil?["sexo"])),
+      _buildInfoTile(
+        Icons.transgender,
+        "Sexo",
+        _formatValue("sexo", perfil?["sexo"]),
+      ),
+
+      // 🔐 Botón para cambiar contraseña
+      Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: ElevatedButton.icon(
+          onPressed: _abrirModalCambiarContrasena,
+          icon: Icon(Icons.lock_outline),
+          label: Text("Cambiar contraseña"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromARGB(255, 255, 249, 240),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
     ];
 
     // 📌 Si la pantalla es menor a 500px, mostrar en una sola columna
@@ -262,7 +379,7 @@ class _IndexScreenState extends State<IndexScreen> {
         "es",
       ).format(date); // Ejemplo: "17 septiembre, 1991"
     } catch (e) {
-      print("❌ Error al formatear fecha: $e");
+      //print("❌ Error al formatear fecha: $e");
       return "Formato inválido";
     }
   }

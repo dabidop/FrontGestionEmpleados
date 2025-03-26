@@ -32,7 +32,7 @@ class _SolicitudesVacacionesScreenState
       DateTime date = DateTime.parse(dateStr);
       return DateFormat("d MMMM, y", "es").format(date);
     } catch (e) {
-      print("❌ Error al formatear fecha: $e");
+      //print("❌ Error al formatear fecha: $e");
       return "Formato inválido";
     }
   }
@@ -58,7 +58,7 @@ class _SolicitudesVacacionesScreenState
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
@@ -77,7 +77,7 @@ class _SolicitudesVacacionesScreenState
           isLoading = false;
         });
       } catch (e) {
-        print("Error al cargar solicitudes: $e");
+        //print("Error al cargar solicitudes: $e");
         setState(() {
           isLoading = false;
         });
@@ -102,7 +102,7 @@ class _SolicitudesVacacionesScreenState
                 itemBuilder: (context, index) {
                   var solicitud = solicitudes[index];
                   String? observaciones = solicitud['observaciones'];
-                  print("Observaciones para ID ${solicitud['idVacacion']}: '${solicitud['observaciones']}'");
+                  //print("Observaciones para ID ${solicitud['idVacacion']}: '${solicitud['observaciones']}'");
                   return Card(
                     margin: const EdgeInsets.symmetric(
                       horizontal: 10,

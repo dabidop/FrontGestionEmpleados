@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+//import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:gestion_empleados/services/secure_storage_service.dart';
@@ -109,13 +109,13 @@ class IncapacidadesService {
     );
 
     // 🔹 Imprimir todos los headers recibidos
-    print("🔹 Headers completos: ${response.headers}");
+    //print("🔹 Headers completos: ${response.headers}");
 
     if (response.statusCode == 200) {
       Uint8List bytes = response.bodyBytes;
 
       // 🔹 Verificar y extraer headers completos
-      print("🔹 Headers recibidos: ${response.headers}");
+      //print("🔹 Headers recibidos: ${response.headers}");
 
       String? disposition;
       response.headers.forEach((key, value) {
@@ -124,12 +124,12 @@ class IncapacidadesService {
         }
       });
 
-      if (disposition == null) {
-        print("⚠️ No se encontró 'content-disposition' en los headers.");
-        return;
-      }
+      //if (disposition == null) {
+        //print("⚠️ No se encontró 'content-disposition' en los headers.");
+        //return;
+      //}
 
-      print("✅ Content-Disposition encontrado: $disposition");
+      //print("✅ Content-Disposition encontrado: $disposition");
 
       // 🔹 Extraer nombre de archivo sin usar expresión regular
       String fileName = "archivo_$id"; // Nombre por defecto
@@ -142,7 +142,7 @@ class IncapacidadesService {
         }
       }
 
-      print("📂 Nombre del archivo detectado: $fileName");
+      //print("📂 Nombre del archivo detectado: $fileName");
 
       if (kIsWeb) {
         // 📂 **Descarga en Web**
@@ -166,7 +166,7 @@ class IncapacidadesService {
         await OpenFile.open(filePath);
       }
     } else {
-      print("❌ Error al descargar el archivo: ${response.statusCode}");
+      //print("❌ Error al descargar el archivo: ${response.statusCode}");
       throw Exception('Error al descargar el archivo');
     }
   }

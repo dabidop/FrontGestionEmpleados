@@ -68,7 +68,7 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
           isLoading = false;
         });
       } catch (e) {
-        print("⚠️ Error al cargar solicitudes: $e");
+        //print("⚠️ Error al cargar solicitudes: $e");
         setState(() {
           isLoading = false;
         });

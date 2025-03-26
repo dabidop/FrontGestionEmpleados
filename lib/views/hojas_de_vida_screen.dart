@@ -47,7 +47,7 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
@@ -57,7 +57,7 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
 
     String? token = await storage.read(key: "jwt_token");
     if (token == null) {
-      print("❌ No se encontró el token JWT.");
+      //print("❌ No se encontró el token JWT.");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: No se encontró el token de autenticación"),
@@ -67,8 +67,8 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
     }
 
     // 🔥 IMPRIMIMOS EL TOKEN Y LOS HEADERS PARA VERIFICARLO
-    print("🔥 Token enviado en la petición: $token");
-    print("🔥 URL de la petición: $apiUrl");
+    //print("🔥 Token enviado en la petición: $token");
+    //print("🔥 URL de la petición: $apiUrl");
 
     try {
       final respuesta = await http.get(
@@ -79,8 +79,8 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
         },
       );
 
-      print("🔍 Código de respuesta HTTP: ${respuesta.statusCode}");
-      print("🔍 Cuerpo de la respuesta: ${respuesta.body}");
+      //print("🔍 Código de respuesta HTTP: ${respuesta.statusCode}");
+      //print("🔍 Cuerpo de la respuesta: ${respuesta.body}");
 
       if (respuesta.statusCode == 200) {
         final jsonData = jsonDecode(respuesta.body);

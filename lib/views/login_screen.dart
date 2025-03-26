@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/views/solicitar_recuperacion_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gestion_empleados/views/index_screen.dart';
 import 'package:gestion_empleados/services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key}); // ✅ Agregamos `super.key` para evitar warnings
+  const LoginScreen({
+    super.key,
+  }); // ✅ Agregamos `super.key` para evitar warnings
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -13,7 +16,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController codigoVerificacionController = TextEditingController();
+  final TextEditingController codigoVerificacionController =
+      TextEditingController();
   bool isLoading = false;
   bool necesitaVerificacion = false;
   String emailPendiente = "";
@@ -39,14 +43,18 @@ class _LoginScreenState extends State<LoginScreen> {
           necesitaVerificacion = true;
           emailPendiente = response["email"];
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Código enviado a ${response["email"]}. Ingrésalo para continuar.<br>"),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Código enviado a ${response["email"]}. Ingrésalo para continuar.<br>",
+            ),
+          ),
+        );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(response["message"] ?? "Error en el login"),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response["message"] ?? "Error en el login")),
+      );
     }
   }
 
@@ -62,9 +70,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = false);
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Registro confirmado. Ahora puedes iniciar sesión."),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Registro confirmado. Ahora puedes iniciar sesión."),
+        ),
+      );
       setState(() {
         necesitaVerificacion = false;
         emailController.clear();
@@ -72,9 +82,9 @@ class _LoginScreenState extends State<LoginScreen> {
         codigoVerificacionController.clear();
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Código incorrecto o expirado."),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Código incorrecto o expirado.")),
+      );
     }
   }
 
@@ -89,7 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: "Correo Electrónico"),
+              decoration: const InputDecoration(
+                labelText: "Correo Electrónico",
+              ),
             ),
             TextField(
               controller: passwordController,
@@ -100,24 +112,45 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 10),
               TextField(
                 controller: codigoVerificacionController,
-                decoration: const InputDecoration(labelText: "Código de Verificación"),
+                decoration: const InputDecoration(
+                  labelText: "Código de Verificación",
+                ),
               ),
               const SizedBox(height: 10),
               isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                      onPressed: _confirmarRegistro,
-                      child: const Text("Confirmar Registro"),
-                    ),
+                    onPressed: _confirmarRegistro,
+                    child: const Text("Confirmar Registro"),
+                  ),
             ] else ...[
               const SizedBox(height: 20),
               isLoading
                   ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _login,
-                      child: const Text("Ingresar"),
-                    ),
-            ]
+                  : Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: _login,
+                        child: const Text("Ingresar"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => SolicitarRecuperacionScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "¿Olvidaste tu contraseña?",
+                          style: TextStyle(color: Colors.blueAccent),
+                        ),
+                      ),
+                    ],
+                  ),
+            ],
           ],
         ),
       ),

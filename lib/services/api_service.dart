@@ -5,7 +5,6 @@ import 'package:gestion_empleados/services/secure_storage_service.dart';
 
 class ApiService {
   static const String baseUrl = "http://localhost:5219/api/auth";
-  
 
   // ✅ Método para iniciar sesión o solicitar registro
   static Future<Map<String, dynamic>> login(
@@ -111,7 +110,10 @@ class ApiService {
       jsonData["esAprobador"] = esAprobador;
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('esAprobador', esAprobador); // 🔥 Guardamos `esAprobador`
+      await prefs.setBool(
+        'esAprobador',
+        esAprobador,
+      ); // 🔥 Guardamos `esAprobador`
 
       // 🔥 Mensajes de depuración en consola
       print("🔥 Cargo evaluado: ${jsonData["cargo"]}");
@@ -122,4 +124,48 @@ class ApiService {
       return {"success": false, "message": "Error al obtener el perfil."};
     }
   }
+
+  //Cambiar contraseña
+  static Future<bool> cambiarContrasena(String actual, String nueva) async {
+    String? token = await SecureStorageService.getToken();
+
+    final response = await http.post(
+      Uri.parse("http://localhost:5219/api/usuarios/cambiar-contrasena"),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'contrasenaActual': actual, 'nuevaContrasena': nueva}),
+    );
+
+    return response.statusCode == 200;
+  }
+
+  // Enviar código al correo para recuperación
+  static Future<bool> enviarCodigoRecuperacion(String email) async {
+    final response = await http.post(
+      Uri.parse("http://localhost:5219/api/auth/correo-recuperacion"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email}),
+    );
+
+    return response.statusCode == 200;
+  }
+
+  // Confirmar código + nueva contraseña
+static Future<bool> confirmarRecuperacion(
+    String email, String codigo, String nuevaContrasena) async {
+  final response = await http.post(
+    Uri.parse("http://localhost:5219/api/auth/restablecer-contrasena"),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "email": email,
+      "codigoVerificacion": codigo,
+      "nuevaContrasena": nuevaContrasena
+    }),
+  );
+
+  return response.statusCode == 200;
+}
+
 }

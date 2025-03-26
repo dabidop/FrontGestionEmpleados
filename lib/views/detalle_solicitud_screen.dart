@@ -39,7 +39,7 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
