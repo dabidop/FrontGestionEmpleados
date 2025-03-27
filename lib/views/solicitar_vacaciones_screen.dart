@@ -86,8 +86,8 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
 
     int diasSolicitados = fechaFin!.difference(fechaInicio!).inDays + 1;
 
-    bool success = await VacacionesService.solicitarVacaciones(
-      codigoEmpleado: codigoEmpleado, // ✅ Ahora lo obtenemos correctamente
+    final resultado = await VacacionesService.solicitarVacaciones(
+      codigoEmpleado: codigoEmpleado,
       fechaInicio: fechaInicio!,
       fechaFin: fechaFin!,
       diasSolicitados: diasSolicitados,
@@ -95,19 +95,18 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
       observaciones: "Solicitud generada desde la app.",
     );
 
-    if (success) {
+    if (resultado["success"]) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Solicitud enviada con éxito")),
       );
 
-      // 🔥 Redirigir automáticamente a la lista de solicitudes
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SolicitudesVacacionesScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al enviar la solicitud")),
+        SnackBar(content: Text(resultado["message"] ?? "Error desconocido")),
       );
     }
   }

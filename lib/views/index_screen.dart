@@ -327,6 +327,11 @@ class _IndexScreenState extends State<IndexScreen> {
         "Sexo",
         _formatValue("sexo", perfil?["sexo"]),
       ),
+      _buildInfoTile(
+        Icons.beach_access, // ☀️ Ícono de vacaciones
+        "Días disponibles",
+        "${perfil?["diasVacacionesDisponibles"] ?? 0} días",
+      ),
 
       // 🔐 Botón para cambiar contraseña
       Padding(

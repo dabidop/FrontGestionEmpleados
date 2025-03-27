@@ -153,19 +153,21 @@ class ApiService {
   }
 
   // Confirmar código + nueva contraseña
-static Future<bool> confirmarRecuperacion(
-    String email, String codigo, String nuevaContrasena) async {
-  final response = await http.post(
-    Uri.parse("http://localhost:5219/api/auth/restablecer-contrasena"),
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "email": email,
-      "codigoVerificacion": codigo,
-      "nuevaContrasena": nuevaContrasena
-    }),
-  );
+  static Future<bool> confirmarRecuperacion(
+    String email,
+    String codigo,
+    String nuevaContrasena,
+  ) async {
+    final response = await http.post(
+      Uri.parse("http://localhost:5219/api/auth/restablecer-contrasena"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "codigoVerificacion": codigo,
+        "nuevaContrasena": nuevaContrasena,
+      }),
+    );
 
-  return response.statusCode == 200;
-}
-
+    return response.statusCode == 200;
+  }
 }

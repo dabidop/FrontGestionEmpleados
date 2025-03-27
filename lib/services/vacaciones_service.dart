@@ -147,7 +147,7 @@ class VacacionesService {
   }
 
   // ✅ 4️⃣ Solicitar vacaciones
-  static Future<bool> solicitarVacaciones({
+  static Future<Map<String, dynamic>> solicitarVacaciones({
     required String codigoEmpleado,
     required DateTime fechaInicio,
     required DateTime fechaFin,
@@ -177,10 +177,18 @@ class VacacionesService {
     );
 
     if (response.statusCode == 200) {
-      return true;
+      return {"success": true};
+    } else if (response.statusCode == 400) {
+      final errorData = jsonDecode(response.body);
+      return {
+        "success": false,
+        "message": errorData["mensaje"] ?? "Error desconocido",
+      };
     } else {
-      //print("Error al solicitar vacaciones: ${response.body}");
-      return false;
+      return {
+        "success": false,
+        "message": "Error inesperado al solicitar vacaciones",
+      };
     }
   }
 }
