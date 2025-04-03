@@ -72,12 +72,19 @@ class _SolicitudesVacacionesScreenState
             await VacacionesService.obtenerVacacionesPorEmpleado(
               codigoEmpleado!,
             );
+
+        // 🔥 Aquí invertimos la lista para mostrar primero las más recientes
+        data.sort((a, b) {
+          DateTime fechaA = DateTime.parse(a['fechaSolicitud']);
+          DateTime fechaB = DateTime.parse(b['fechaSolicitud']);
+          return fechaB.compareTo(fechaA); // Más reciente primero
+        });
+
         setState(() {
           solicitudes = data;
           isLoading = false;
         });
       } catch (e) {
-        //print("Error al cargar solicitudes: $e");
         setState(() {
           isLoading = false;
         });

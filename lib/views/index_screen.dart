@@ -146,9 +146,9 @@ class _IndexScreenState extends State<IndexScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await ApiService.logout();
-              Navigator.pushReplacement(
-                context,
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
+                (Route<dynamic> route) => false,
               );
             },
           ),

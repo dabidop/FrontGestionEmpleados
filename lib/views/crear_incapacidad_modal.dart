@@ -16,10 +16,46 @@ class _CrearIncapacidadModalState extends State<CrearIncapacidadModal> {
   DateTime? fechaFin;
   PlatformFile? archivo;
 
+  Future<bool> _mostrarConfirmacion() async {
+    return await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Confirmar Incapacidad'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("¿Estás seguro de registrar esta incapacidad?"),
+                    const SizedBox(height: 10),
+                    Text(
+                      "📅 Fecha Inicio: ${fechaInicio?.toString().split(' ')[0] ?? '-'}",
+                    ),
+                    Text(
+                      "📅 Fecha Fin: ${fechaFin?.toString().split(' ')[0] ?? '-'}",
+                    ),
+                    Text("📄 Archivo: ${archivo?.name ?? 'No seleccionado'}"),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancelar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Confirmar'),
+                  ),
+                ],
+              ),
+        ) ??
+        false; // Por si se cierra el diálogo sin elegir nada
+  }
+
   Future<void> _seleccionarArchivo() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf'],
+      allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
     );
     if (result != null) {
       setState(() {
@@ -30,6 +66,9 @@ class _CrearIncapacidadModalState extends State<CrearIncapacidadModal> {
 
   Future<void> _crearIncapacidad() async {
     if (fechaInicio != null && fechaFin != null && archivo != null) {
+      final confirmado = await _mostrarConfirmacion();
+      if (!confirmado) return;
+
       try {
         await IncapacidadesService.crearIncapacidad(
           widget.codigoEmpleado,
@@ -39,22 +78,20 @@ class _CrearIncapacidadModalState extends State<CrearIncapacidadModal> {
           archivo!.bytes!,
         );
 
-        // 🔥 Cierra el modal
         Navigator.pop(context);
 
-        // 🔥 Muestra un mensaje de éxito
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Incapacidad creada con éxito')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✅ Incapacidad creada con éxito')),
+        );
       } catch (e) {
         print('Error: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al crear la incapacidad')),
+          SnackBar(content: Text('❌ Error al crear la incapacidad')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, complete todos los campos')),
+        SnackBar(content: Text('⚠️ Por favor, complete todos los campos')),
       );
     }
   }

@@ -23,6 +23,49 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
     cargarAprobadores();
   }
 
+  Future<bool> _mostrarConfirmacionVacaciones(
+    DateTime inicio,
+    DateTime fin,
+    int dias,
+    String aprobador,
+  ) async {
+    final aprobadorNombre =
+        aprobadores.firstWhere((a) => a['codigo'] == aprobador)['nombre'];
+
+    return await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text("Confirmar Solicitud"),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "¿Estás seguro de registrar esta solicitud de vacaciones?",
+                    ),
+                    const SizedBox(height: 10),
+                    Text("📅 Inicio: ${inicio.toString().split(' ')[0]}"),
+                    Text("📅 Fin: ${fin.toString().split(' ')[0]}"),
+                    Text("📆 Días solicitados: $dias"),
+                    Text("🧑‍💼 Aprobador: $aprobadorNombre"),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text("Cancelar"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text("Confirmar"),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
+  }
+
   // ✅ Obtener aprobadores desde la API
   Future<void> cargarAprobadores() async {
     try {
@@ -85,6 +128,16 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
     }
 
     int diasSolicitados = fechaFin!.difference(fechaInicio!).inDays + 1;
+
+    // 🔥 Mostrar la alerta de confirmación
+    final confirmado = await _mostrarConfirmacionVacaciones(
+      fechaInicio!,
+      fechaFin!,
+      diasSolicitados,
+      usuarioAprueba!,
+    );
+
+    if (!confirmado) return;
 
     final resultado = await VacacionesService.solicitarVacaciones(
       codigoEmpleado: codigoEmpleado,

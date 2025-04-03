@@ -105,6 +105,7 @@ class ApiService {
       bool esAprobador =
           cargo.contains("COORDINADOR") ||
           cargo.contains("GERENTE") ||
+          //cargo.contains("AUXILIAR") ||
           cargo.contains("DIRECTOR");
 
       jsonData["esAprobador"] = esAprobador;

@@ -40,7 +40,7 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
         perfil = data;
       });
     } catch (e) {
-      print('Error al cargar datos del perfil: $e');
+      //print('Error al cargar datos del perfil: $e');
     }
   }
 
@@ -56,12 +56,12 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
             );
 
         // 🔥🔥🔥 PRINT PARA DEPURAR 🔥🔥🔥
-        print("🚀 Datos recibidos en Flutter:");
-        for (var solicitud in data) {
-          print(
-            "Empleado: ${solicitud["nombreCompleto"]} | Días: ${solicitud["diasSolicitados"]}",
-          );
-        }
+        //print("🚀 Datos recibidos en Flutter:");
+        //for (var solicitud in data) {
+        //  print(
+        //    "Empleado: ${solicitud["nombreCompleto"]} | Días: ${solicitud["diasSolicitados"]}",
+        //  );
+        //}
 
         setState(() {
           solicitudes = data;
