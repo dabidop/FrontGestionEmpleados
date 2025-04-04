@@ -328,9 +328,9 @@ class _IndexScreenState extends State<IndexScreen> {
         _formatValue("sexo", perfil?["sexo"]),
       ),
       _buildInfoTile(
-        Icons.beach_access, // ☀️ Ícono de vacaciones
+        Icons.beach_access,
         "Días disponibles",
-        "${perfil?["diasVacacionesDisponibles"] ?? 0} días",
+        "${(perfil?["diasVacacionesDisponibles"] ?? 0).toStringAsFixed(2)} días",
       ),
 
       // 🔐 Botón para cambiar contraseña

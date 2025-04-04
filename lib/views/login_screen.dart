@@ -92,67 +92,89 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Iniciar Sesión")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Correo Electrónico",
-              ),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: "Contraseña"),
-              obscureText: true,
-            ),
-            if (necesitaVerificacion) ...[
-              const SizedBox(height: 10),
-              TextField(
-                controller: codigoVerificacionController,
-                decoration: const InputDecoration(
-                  labelText: "Código de Verificación",
-                ),
-              ),
-              const SizedBox(height: 10),
-              isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                    onPressed: _confirmarRegistro,
-                    child: const Text("Confirmar Registro"),
-                  ),
-            ] else ...[
-              const SizedBox(height: 20),
-              isLoading
-                  ? const CircularProgressIndicator()
-                  : Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        onPressed: _login,
-                        child: const Text("Ingresar"),
+                      const SizedBox(height: 30),
+                      Image.asset(
+                        'assets/logo_login.png',
+                        height: 180,
+                        fit: BoxFit.contain,
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => SolicitarRecuperacionScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "¿Olvidaste tu contraseña?",
-                          style: TextStyle(color: Colors.blueAccent),
+                      const SizedBox(height: 30),
+                      TextField(
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                          labelText: "Correo Electrónico",
                         ),
                       ),
+                      TextField(
+                        controller: passwordController,
+                        decoration: const InputDecoration(
+                          labelText: "Contraseña",
+                        ),
+                        obscureText: true,
+                      ),
+                      if (necesitaVerificacion) ...[
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: codigoVerificacionController,
+                          decoration: const InputDecoration(
+                            labelText: "Código de Verificación",
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        isLoading
+                            ? const CircularProgressIndicator()
+                            : ElevatedButton(
+                              onPressed: _confirmarRegistro,
+                              child: const Text("Confirmar Registro"),
+                            ),
+                      ] else ...[
+                        const SizedBox(height: 20),
+                        isLoading
+                            ? const CircularProgressIndicator()
+                            : Column(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _login,
+                                  child: const Text("Ingresar"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) =>
+                                                SolicitarRecuperacionScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    "¿Olvidaste tu contraseña?",
+                                    style: TextStyle(color: Colors.blueAccent),
+                                  ),
+                                ),
+                              ],
+                            ),
+                      ],
+                      const Spacer(), // para empujar el contenido si hay espacio
                     ],
                   ),
-            ],
-          ],
-        ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
