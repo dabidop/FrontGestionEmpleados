@@ -154,6 +154,8 @@ class VacacionesService {
     required int diasSolicitados,
     required String usuarioAprueba,
     required String observaciones,
+    required int diasDescanso,
+    required int diasPlata,
   }) async {
     String? token = await SecureStorageService.getToken();
 
@@ -173,6 +175,9 @@ class VacacionesService {
         "usuarioAprueba": usuarioAprueba,
         "fechaAprobacion": null,
         "observaciones": observaciones,
+        "diasDescanso": diasDescanso,
+        "diasPlata": diasPlata,
+        "valorPagoPlata": 0, // 🔥 Este lo calcula el backend
       }),
     );
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,13 +16,20 @@ class _VacacionantesScreenState extends State<VacacionantesScreen> {
   List<dynamic> vacacionantes = [];
   bool isLoading = true;
   bool isUnauthorized = false;
-  
-  get perfil => null;
+  Map<String, dynamic>? perfil;
 
   @override
   void initState() {
     super.initState();
     _fetchVacacionantes();
+    _loadPerfil();
+  }
+
+  Future<void> _loadPerfil() async {
+    var data = await ApiService.getPerfil();
+    setState(() {
+      perfil = data;
+    });
   }
 
   Future<void> _fetchVacacionantes() async {
@@ -57,38 +65,40 @@ class _VacacionantesScreenState extends State<VacacionantesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Empleados en Vacaciones"),
-      ),
+      appBar: AppBar(title: const Text("Empleados en Vacaciones")),
       drawer: CustomDrawer(perfil: perfil),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : isUnauthorized
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : isUnauthorized
               ? const Center(
-                  child: Text(
-                    "⚠️ No autorizado. Inicie sesión nuevamente.",
-                    style: TextStyle(color: Colors.red, fontSize: 16),
-                  ),
-                )
+                child: Text(
+                  "⚠️ No autorizado. Inicie sesión nuevamente.",
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              )
               : vacacionantes.isEmpty
-                  ? const Center(child: Text("No hay empleados de vacaciones"))
-                  : ListView.builder(
-                      itemCount: vacacionantes.length,
-                      itemBuilder: (context, index) {
-                        final empleado = vacacionantes[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                          child: ListTile(
-                            title: Text(empleado['nombre']),
-                            subtitle: Text("Cargo: ${empleado['cargo']}"),
-                            trailing: Text(
-                              "Hasta:\n${_formatDate(empleado['fechaFin'])}",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      },
+              ? const Center(child: Text("No hay empleados de vacaciones"))
+              : ListView.builder(
+                itemCount: vacacionantes.length,
+                itemBuilder: (context, index) {
+                  final empleado = vacacionantes[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
                     ),
+                    child: ListTile(
+                      title: Text(empleado['nombre']),
+                      subtitle: Text("Cargo: ${empleado['cargo']}"),
+                      trailing: Text(
+                        "Hasta:\n${_formatDate(empleado['fechaFin'])}",
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
+              ),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_empleados/services/api_service.dart';
 import 'package:gestion_empleados/widgets/custom_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -17,12 +18,20 @@ class _IncapacitadosScreenState extends State<IncapacitadosScreen> {
   bool isLoading = true;
   bool isUnauthorized = false;
   
-  get perfil => null;
+  Map<String, dynamic>? perfil;
 
   @override
   void initState() {
     super.initState();
     _fetchIncapacitados();
+    _loadPerfil();
+  }
+
+  Future<void> _loadPerfil() async {
+    var data = await ApiService.getPerfil();
+    setState(() {
+      perfil = data;
+    });
   }
 
   Future<void> _fetchIncapacitados() async {

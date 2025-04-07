@@ -16,6 +16,8 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
   String? usuarioAprueba;
   bool enviando = false;
   List<Map<String, String>> aprobadores = [];
+  int? diasDescanso;
+  int? diasPlata;
 
   @override
   void initState() {
@@ -127,7 +129,68 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
       return;
     }
 
-    int diasSolicitados = fechaFin!.difference(fechaInicio!).inDays + 1;
+    int contarDiasHabiles(DateTime inicio, DateTime fin) {
+      int diasHabiles = 0;
+      DateTime fecha = inicio;
+
+      while (!fecha.isAfter(fin)) {
+        if (fecha.weekday >= DateTime.monday &&
+            fecha.weekday <= DateTime.friday) {
+          diasHabiles++;
+        }
+        fecha = fecha.add(Duration(days: 1));
+      }
+
+      return diasHabiles;
+    }
+
+    //int diasSolicitados = fechaFin!.difference(fechaInicio!).inDays + 1;
+    int diasSolicitados = contarDiasHabiles(fechaInicio!, fechaFin!);
+
+
+    if (diasDescanso == null || diasPlata == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Debes indicar cuántos días son de descanso y cuántos en plata",
+          ),
+        ),
+      );
+      return;
+    }
+
+    if ((diasDescanso! + diasPlata!) != diasSolicitados) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "La suma de los días debe ser igual a los días solicitados.",
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (diasPlata! > (diasSolicitados / 2)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Solo puedes solicitar hasta el 50% en compensación económica.",
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (diasPlata! > diasDescanso!) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Los días en plata no pueden ser mayores a los de descanso.",
+          ),
+        ),
+      );
+      return;
+    }
 
     // 🔥 Mostrar la alerta de confirmación
     final confirmado = await _mostrarConfirmacionVacaciones(
@@ -146,6 +209,8 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
       diasSolicitados: diasSolicitados,
       usuarioAprueba: usuarioAprueba!,
       observaciones: "Solicitud generada desde la app.",
+      diasDescanso: diasDescanso!, // ✅ NUEVO
+      diasPlata: diasPlata!, // ✅ NUEVO
     );
 
     if (resultado["success"]) {
@@ -242,6 +307,28 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
                 });
               },
             ),
+            SizedBox(height: 20),
+            Text(
+              "Días de descanso y en compensación económica:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: "Días de descanso"),
+              onChanged: (value) {
+                diasDescanso = int.tryParse(value);
+              },
+            ),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Días en plata (máximo 50%)",
+              ),
+              onChanged: (value) {
+                diasPlata = int.tryParse(value);
+              },
+            ),
+
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: enviarSolicitud,

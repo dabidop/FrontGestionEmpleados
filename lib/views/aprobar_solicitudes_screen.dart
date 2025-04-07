@@ -97,7 +97,9 @@ class _AprobarSolicitudesScreenState extends State<AprobarSolicitudesScreen> {
                         "Empleado: ${solicitud['nombreCompleto'] ?? 'Desconocido'}",
                       ),
                       subtitle: Text(
-                        "Días solicitados: ${solicitud['diasSolicitados']}",
+                        "Días solicitados: ${solicitud['diasSolicitados']} "
+                        "(Descanso: ${solicitud['diasDescanso'] ?? 0}, "
+                        "Plata: ${solicitud['diasPlata'] ?? 0})",
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {

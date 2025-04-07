@@ -81,18 +81,27 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Empleado: ${widget.solicitud['codigoEmpleado']}", style: const TextStyle(fontSize: 18)),
+            Text(
+              "Empleado: ${widget.solicitud['codigoEmpleado']}",
+              style: const TextStyle(fontSize: 18),
+            ),
             const SizedBox(height: 10),
             Text("Fecha Inicio: ${widget.solicitud['fechaInicio']}"),
             Text("Fecha Fin: ${widget.solicitud['fechaFin']}"),
+            Text("Días de descanso: ${widget.solicitud['diasDescanso'] ?? 0}"),
+            Text("Días en plata: ${widget.solicitud['diasPlata'] ?? 0}"),
+            Text(
+              "Valor pago en plata: \$${widget.solicitud['valorPagoPlata']?.toStringAsFixed(0) ?? '0'}",
+            ),
             const SizedBox(height: 20),
 
             // ✅ Dropdown para seleccionar estado
             DropdownButton<String>(
               value: estadoSeleccionado,
-              items: ["Aprobada", "Rechazada"].map((String estado) {
-                return DropdownMenuItem(value: estado, child: Text(estado));
-              }).toList(),
+              items:
+                  ["Aprobada", "Rechazada"].map((String estado) {
+                    return DropdownMenuItem(value: estado, child: Text(estado));
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   estadoSeleccionado = value!;
@@ -104,7 +113,9 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
             // ✅ Campo de observaciones
             TextField(
               controller: observacionesController,
-              decoration: const InputDecoration(labelText: "Observaciones (opcional)"),
+              decoration: const InputDecoration(
+                labelText: "Observaciones (opcional)",
+              ),
             ),
             const SizedBox(height: 20),
 
