@@ -137,6 +137,8 @@ class _IndexScreenState extends State<IndexScreen> {
     double horas = (perfil?["horas_laboradas"] ?? 0).toDouble();
     double valorHora = (perfil?["valor_hora"] ?? 0).toDouble();
     double salarioCalculado = horas * valorHora;
+    double promedio = (perfil?["promedio"] ?? 0).toDouble();
+    double bonoMensual = promedio - salarioCalculado;
 
     return Scaffold(
       appBar: AppBar(
@@ -215,6 +217,8 @@ class _IndexScreenState extends State<IndexScreen> {
                                           horas,
                                           valorHora,
                                           salarioCalculado,
+                                          bonoMensual,
+                                          promedio,
                                           constraints
                                               .maxWidth, // Solo agrego el ancho para manejar la responsividad
                                         ),
@@ -226,6 +230,8 @@ class _IndexScreenState extends State<IndexScreen> {
                                     horas,
                                     valorHora,
                                     salarioCalculado,
+                                    bonoMensual,
+                                    promedio,
                                     constraints
                                         .maxWidth, // Se mantiene la estructura
                                   );
@@ -276,6 +282,8 @@ class _IndexScreenState extends State<IndexScreen> {
     double horas,
     double valorHora,
     double salario,
+    double bonoMensual,
+    double promedio,
     double
     screenWidth, // Solo agrego el ancho de la pantalla, sin tocar más nada
   ) {
@@ -289,14 +297,15 @@ class _IndexScreenState extends State<IndexScreen> {
         "Fecha de nacimiento",
         _formatDate(perfil?["fecha_nacimiento"]),
       ),
-    ];
-
-    List<Widget> columna2 = [
       _buildInfoTile(
         Icons.child_friendly,
         "Hijos",
         perfil?["hijos"].toString(),
       ),
+    ];
+
+    List<Widget> columna2 = [
+      
       _buildInfoTile(Icons.timer, "Horas por mes", horas.toString()),
       _buildInfoTile(
         Icons.attach_money,
@@ -307,6 +316,16 @@ class _IndexScreenState extends State<IndexScreen> {
         Icons.monetization_on,
         "Salario base",
         _formatCurrency(salario),
+      ),
+      _buildInfoTile(
+        Icons.card_giftcard,
+        "Bono mensual",
+        _formatCurrency(bonoMensual),
+      ),
+      _buildInfoTile(
+        Icons.monetization_on,
+        "Salario promedio",
+        _formatCurrency(promedio),
       ),
       _buildInfoTile(Icons.location_city, "Dirección", perfil?["direccion"]),
     ];
