@@ -65,7 +65,14 @@ class _VacacionantesScreenState extends State<VacacionantesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Empleados en Vacaciones")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Empleados en vacaciones",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       drawer: CustomDrawer(perfil: perfil),
       body:
           isLoading

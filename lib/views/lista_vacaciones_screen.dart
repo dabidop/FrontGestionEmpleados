@@ -95,7 +95,14 @@ class _SolicitudesVacacionesScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Solicitudes de Vacaciones")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Vacaciones solicitadas",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body:
           isLoading

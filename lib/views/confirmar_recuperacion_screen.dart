@@ -63,7 +63,14 @@ class _ConfirmarRecuperacionScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Confirmar Recuperación")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Confirmar recuperación",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

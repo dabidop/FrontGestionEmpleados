@@ -60,7 +60,12 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Certificados Laborales"),
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Certificados laborales",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -71,6 +76,7 @@ class _CartaLaboralPageState extends State<CartaLaboralPage> {
                   drawerAbierto = true;
                 });
               },
+              
             );
           },
         ),

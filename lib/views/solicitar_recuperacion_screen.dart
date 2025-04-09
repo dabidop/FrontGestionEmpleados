@@ -38,7 +38,14 @@ class _SolicitarRecuperacionScreenState extends State<SolicitarRecuperacionScree
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Recuperar Contraseña")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Recuperar contraseña",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(

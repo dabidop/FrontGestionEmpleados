@@ -142,19 +142,24 @@ class _IndexScreenState extends State<IndexScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Perfil"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ApiService.logout();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (Route<dynamic> route) => false,
-              );
-            },
-          ),
-        ],
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Inicio",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.logout),
+        //     onPressed: () async {
+        //       await ApiService.logout();
+        //       Navigator.of(context).pushAndRemoveUntil(
+        //         MaterialPageRoute(builder: (context) => const LoginScreen()),
+        //         (Route<dynamic> route) => false,
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
       drawer: CustomDrawer(perfil: perfil),
       body:
@@ -175,7 +180,7 @@ class _IndexScreenState extends State<IndexScreen> {
                           // 📌 Avatar
                           CircleAvatar(
                             radius: 50,
-                            backgroundColor: Colors.blueAccent,
+                            backgroundColor: const Color.fromARGB(255, 26, 26, 58),
                             child: Text(
                               _getIniciales(perfil?["nombre"]),
                               style: const TextStyle(
@@ -411,7 +416,7 @@ class _IndexScreenState extends State<IndexScreen> {
   // 📌 Función para construir un ListTile con icono y texto
   Widget _buildInfoTile(IconData icon, String label, String? value) {
     return ListTile(
-      leading: Icon(icon, color: Colors.blueAccent),
+      leading: Icon(icon, color: Color.fromARGB(255, 26, 26, 58),),
       title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(value ?? "No disponible"),
       contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),

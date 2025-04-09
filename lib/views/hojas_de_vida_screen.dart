@@ -160,7 +160,12 @@ class _HojasDeVidaScreenState extends State<HojasDeVidaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hojas de Vida"),
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Hojas de vida",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: Builder(
           builder: (context) {
             return IconButton(

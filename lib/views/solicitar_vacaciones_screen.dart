@@ -232,7 +232,14 @@ class _SolicitarVacacionesScreenState extends State<SolicitarVacacionesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Solicitar Vacaciones")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Solicitar vacaciones",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body: Padding(
         padding: const EdgeInsets.all(16.0),

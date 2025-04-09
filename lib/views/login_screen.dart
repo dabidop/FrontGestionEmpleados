@@ -91,7 +91,13 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Iniciar Sesión")),
+      appBar: AppBar(
+        title: const Text(
+          "Iniciar Sesión",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(

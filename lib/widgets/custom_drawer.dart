@@ -36,7 +36,7 @@ class CustomDrawer extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(20),
-            color: Colors.blue,
+            color: Color.fromARGB(255, 26, 26, 58),
             child: Column(
               children: [
                 CircleAvatar(

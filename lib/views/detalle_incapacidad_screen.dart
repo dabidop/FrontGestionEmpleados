@@ -105,7 +105,14 @@ class _DetalleIncapacidadScreenState extends State<DetalleIncapacidadScreen> {
     ).isAfter(DateTime.now());
 
     return Scaffold(
-      appBar: AppBar(title: Text('Detalle de Incapacidad')),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Detalle de incapacidad",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body: Padding(
         padding: EdgeInsets.all(16.0),

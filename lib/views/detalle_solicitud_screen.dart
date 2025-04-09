@@ -74,7 +74,14 @@ class _DetalleSolicitudScreenState extends State<DetalleSolicitudScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Detalle Solicitud")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Detalle de solicitud",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

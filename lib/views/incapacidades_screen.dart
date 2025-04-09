@@ -79,7 +79,14 @@ class _IncapacidadesScreenState extends State<IncapacidadesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Incapacidades')),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Incapacidades",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       drawer: perfil == null ? null : CustomDrawer(perfil: perfil),
       body:
           isLoading

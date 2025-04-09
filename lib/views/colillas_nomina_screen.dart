@@ -8,7 +8,12 @@ class ColillasNominaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Colillas de Nómina"),
+        backgroundColor: const Color.fromARGB(255, 26, 26, 58),
+        title: const Text(
+          "Colillas de nómina",
+          style: TextStyle(color: Colors.white), // 🎯 texto blanco
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: CustomDrawer(perfil: null), // 🔥 Usa el Drawer
       body: const Center(
